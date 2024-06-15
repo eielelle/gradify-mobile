@@ -1,0 +1,19 @@
+name: Test Flutter
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  test:
+    name: Check the source code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.16.0
+
+        with:
+          flutter-version-file: pubspec.yaml # path to pubspec.yaml
+      - run: flutter pub get
+      - run: flutter test
