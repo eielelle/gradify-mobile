@@ -2,13 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  static const Color bgColor = Color.fromRGBO(226, 226, 226, 1);
-  static const Color primaryColor = Color.fromRGBO(255, 229, 1, 1);
+  static const Color primary = Color.fromRGBO(102, 204, 138, 1);
+  static const Color primaryFocus = Color.fromRGBO(65, 190, 109, 1);
+  static const Color primaryContent = Color.fromRGBO(249, 250, 251, 1);
 
-  // static const Color primaryColor = Color.fromRGBO(170, 233, 123, 1);
-  static const Color onPrimaryColor = Color.fromRGBO(20, 20, 20, 1);
-  static const Color secondaryColor = Color.fromRGBO(45, 45, 45, 1);
-  static const Color onSecondaryColor = Color.fromRGBO(255, 255, 255, 1);
+  static const Color secondary = Color.fromRGBO(55, 124, 251, 1);
+  static const Color secondaryFocus = Color.fromRGBO(5, 91, 250, 1);
+  static const Color secondaryContent = Color.fromRGBO(249, 250, 251, 1);
+
+  static const Color accent = Color.fromRGBO(234, 82, 52, 1);
+  static const Color accentFocus = Color.fromRGBO(208, 53, 22, 1);
+  static const Color accentContent = Color.fromRGBO(249, 250, 251, 1);
+
+  static const Color neutral = Color.fromRGBO(51, 60, 77, 1);
+  static const Color neutralFocus = Color.fromRGBO(31, 36, 46, 1);
+  static const Color neutralContent = Color.fromRGBO(249, 250, 251, 1);
+
+  static const Color base100 = Color.fromRGBO(255, 255, 255, 1);
+  static const Color base200 = Color.fromRGBO(249, 250, 251, 1);
+  static const Color base300 = Color.fromRGBO(240, 240, 240, 1);
+  static const Color baseContent = Color.fromRGBO(51, 60, 77, 1);
+
+  static const Color info = Color.fromRGBO(28, 146, 242, 1);
+  static const Color success = Color.fromRGBO(0, 148, 133, 1);
+  static const Color warning = Color.fromRGBO(255, 143, 0, 1);
+  static const Color error = Color.fromRGBO(255, 87, 36, 1);
 }
 
 class BaseTheme {
@@ -48,20 +66,19 @@ class LightTheme extends BaseTheme {
     return theme.copyWith(
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: theme.elevatedButtonTheme.style?.copyWith(
-          backgroundColor:
-              const MaterialStatePropertyAll(AppColors.primaryColor),
+          backgroundColor: const MaterialStatePropertyAll(AppColors.base200),
           foregroundColor:
-              const MaterialStatePropertyAll(AppColors.onPrimaryColor),
+              const MaterialStatePropertyAll(AppColors.baseContent),
         )),
         outlinedButtonTheme: OutlinedButtonThemeData(
             style: theme.outlinedButtonTheme.style?.copyWith(
           foregroundColor:
-              const MaterialStatePropertyAll(AppColors.onPrimaryColor),
+              const MaterialStatePropertyAll(AppColors.baseContent),
         )),
         textButtonTheme: TextButtonThemeData(
             style: theme.textButtonTheme.style?.copyWith(
           foregroundColor:
-              const MaterialStatePropertyAll(AppColors.onPrimaryColor),
+              const MaterialStatePropertyAll(AppColors.baseContent),
         )));
   }
 }
