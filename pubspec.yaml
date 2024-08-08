@@ -37,6 +37,9 @@ dependencies:
   google_fonts: ^6.2.1
   iconsax: ^0.0.8
   fl_chart: ^0.68.0
+  dio: ^5.5.0+1
+  flutter_hooks: ^0.20.5
+  riverpod: ^2.5.1
 
 dev_dependencies:
   flutter_test:

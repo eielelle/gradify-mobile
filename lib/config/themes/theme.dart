@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AppColors {
+class AppColorsLight {
   static const Color primary = Color.fromRGBO(102, 204, 138, 1);
   static const Color primaryFocus = Color.fromRGBO(65, 190, 109, 1);
   static const Color primaryContent = Color.fromRGBO(249, 250, 251, 1);
@@ -27,6 +27,9 @@ class AppColors {
   static const Color success = Color.fromRGBO(0, 148, 133, 1);
   static const Color warning = Color.fromRGBO(255, 143, 0, 1);
   static const Color error = Color.fromRGBO(255, 87, 36, 1);
+}
+
+class AppColorsDark {
 }
 
 class BaseTheme {
@@ -66,19 +69,22 @@ class LightTheme extends BaseTheme {
     return theme.copyWith(
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: theme.elevatedButtonTheme.style?.copyWith(
-          backgroundColor: const MaterialStatePropertyAll(AppColors.base200),
+          backgroundColor: const MaterialStatePropertyAll(AppColorsLight.base200),
           foregroundColor:
-              const MaterialStatePropertyAll(AppColors.baseContent),
+              const MaterialStatePropertyAll(AppColorsLight.baseContent),
         )),
         outlinedButtonTheme: OutlinedButtonThemeData(
             style: theme.outlinedButtonTheme.style?.copyWith(
           foregroundColor:
-              const MaterialStatePropertyAll(AppColors.baseContent),
+              const MaterialStatePropertyAll(AppColorsLight.baseContent),
         )),
         textButtonTheme: TextButtonThemeData(
             style: theme.textButtonTheme.style?.copyWith(
           foregroundColor:
-              const MaterialStatePropertyAll(AppColors.baseContent),
+              const MaterialStatePropertyAll(AppColorsLight.baseContent),
         )));
   }
+}
+
+class DarkTheme extends BaseTheme {
 }
