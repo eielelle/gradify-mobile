@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:gradify/screens/sign_in.dart';
+import 'package:gradify/config/values/sizes.dart';
 
 class ApplicationLayout extends StatelessWidget {
-  const ApplicationLayout({super.key});
+  final Widget child;
+
+  const ApplicationLayout({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SafeArea(child: SignInScreen()),
+    return Scaffold(
+      body: SafeArea(
+          child: Padding(
+        padding: const EdgeInsets.all(AppSizes.mediumPadding),
+        child: child,
+      )),
     );
   }
 }
