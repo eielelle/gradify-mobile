@@ -44,3 +44,7 @@ app.*.map.json
 
 # Todo Related
 *.todo
+
+# code generated files
+*.g.dart
+*.freezed.dart
