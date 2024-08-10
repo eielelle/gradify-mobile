@@ -36,24 +36,32 @@ class AuthNotifier extends _$AuthNotifier {
       // Initiate loading
       state = const AuthState(isLoading: true);
 
-      Response res =
-          await dio.post(ApiEndpoints.signin,
-              data: data,
-              options: Options(headers: {
-                'Content-Type': 'application/json',
-              }));
+      Response res = await dio.post(ApiEndpoints.signin,
+          data: data,
+          options: Options(headers: {
+            'Content-Type': 'application/json',
+          }));
 
       // Handle the response
       if (res.statusCode == 200) {
-        state = AuthState(isAuthenticated: true, teacherAccount: TeacherAccount.fromJson(res.data['data']));
+        state = AuthState(
+            isAuthenticated: true,
+            teacherAccount: TeacherAccount.fromJson(res.data['data']));
       } else {
         state = const AuthState();
       }
     } catch (e) {
       if (e is DioException) {
-        state = AuthState(isError: true, errorMsg: e.response?.data['status']['message']);
+        if (e.response != null) {
+          state = AuthState(
+              isError: true, errorMsg: e.response?.data['status']['message']);
+        } else {
+          state =
+              const AuthState(isError: true, errorMsg: "Something went wrong");
+        }
       } else {
-        state = const AuthState(isError: true, errorMsg: "Something went wrong.");
+        state =
+            const AuthState(isError: true, errorMsg: "Something went wrong.");
       }
     }
   }

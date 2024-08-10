@@ -9,11 +9,7 @@ class ApplicationLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-          child: Padding(
-        padding: const EdgeInsets.all(AppSizes.mediumPadding),
-        child: child,
-      )),
+      body: SafeArea(child: child),
     );
   }
 }

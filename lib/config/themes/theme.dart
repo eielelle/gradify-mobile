@@ -29,8 +29,7 @@ class AppColorsLight {
   static const Color error = Color.fromRGBO(255, 87, 36, 1);
 }
 
-class AppColorsDark {
-}
+class AppColorsDark {}
 
 class BaseTheme {
   ThemeData get themeData {
@@ -41,7 +40,7 @@ class BaseTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
               shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(4))))),
+                  borderRadius: BorderRadius.all(Radius.circular(8))))),
 
       // outlined buttn
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -67,9 +66,22 @@ class LightTheme extends BaseTheme {
     final theme = super.themeData;
 
     return theme.copyWith(
+        inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+          filled: true,
+          fillColor: AppColorsLight.base300,
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: AppColorsLight.neutral, width: 2),
+          ),
+          enabledBorder: const OutlineInputBorder(
+            borderSide:
+                BorderSide(color: AppColorsLight.neutralFocus, width: 2),
+          ),
+
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: theme.elevatedButtonTheme.style?.copyWith(
-          backgroundColor: const MaterialStatePropertyAll(AppColorsLight.base200),
+          backgroundColor:
+              const MaterialStatePropertyAll(AppColorsLight.primary),
           foregroundColor:
               const MaterialStatePropertyAll(AppColorsLight.baseContent),
         )),
@@ -86,5 +98,4 @@ class LightTheme extends BaseTheme {
   }
 }
 
-class DarkTheme extends BaseTheme {
-}
+class DarkTheme extends BaseTheme {}
