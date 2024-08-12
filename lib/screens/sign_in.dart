@@ -4,7 +4,7 @@ import 'package:gradify/config/themes/theme.dart';
 import 'package:gradify/config/values/sizes.dart';
 import 'package:gradify/providers/auth_notifier_provider.dart';
 import 'package:gradify/routes/app_router.dart';
-import 'package:gradify/screens/home_screen.dart';
+import 'package:gradify/screens/home.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SignInScreen extends HookConsumerWidget {
@@ -29,7 +29,9 @@ class SignInScreen extends HookConsumerWidget {
       return null;
     }, [authProviderState]);
 
-    return Column(
+    return Scaffold(
+        body: SafeArea(
+            child: Column(
       children: [
         if (authProviderState.isError)
           Container(
@@ -95,6 +97,6 @@ class SignInScreen extends HookConsumerWidget {
                   ],
                 )))
       ],
-    );
+    )));
   }
 }
