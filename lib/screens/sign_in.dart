@@ -51,6 +51,10 @@ class SignInScreen extends HookConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Image.asset('assets/images/GF.png'),
+                    const SizedBox(
+                      height: AppSizes.mediumMargin,
+                    ),
                     const Text(
                       "Sign In",
                       style: TextStyle(fontSize: AppSizes.largeFontSize),
