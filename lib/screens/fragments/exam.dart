@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gradify/config/values/sizes.dart';
+import 'package:gradify/views/widgets/exam_card.dart';
+import 'package:gradify/views/widgets/searchbar.dart';
 
-class ExamScreenFragment extends StatelessWidget {
-  const ExamScreenFragment({super.key});
+class ExamFragment extends StatelessWidget {
+  const ExamFragment({super.key});
 
   @override
   Widget build(BuildContext context) {

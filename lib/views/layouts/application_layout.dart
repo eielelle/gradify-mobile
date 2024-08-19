@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gradify/config/values/sizes.dart';
 
 class ApplicationLayout extends StatelessWidget {
   final Widget child;
