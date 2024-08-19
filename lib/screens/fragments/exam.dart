@@ -8,10 +8,6 @@ class ExamFragment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-        padding: EdgeInsets.all(AppSizes.mediumPadding),
-        child: Column(
-          children: [SearchBarWidget(), ExamCardWidget()],
-        ));
+    return const Placeholder();
   }
 }

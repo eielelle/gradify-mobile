@@ -13,7 +13,7 @@ class HomeScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _widgetOptions = [
+    final List<Widget> widgetOptions = [
       const ExamFragment(),
       const ClassFragment(),
       const StudentFragment(),
@@ -31,7 +31,7 @@ class HomeScreen extends HookWidget {
                 fontSize: AppSizes.mediumFontSize,
                 color: AppColorsLight.neutralContent),
           ))),
-      body: _widgetOptions.elementAt(selectedIndex.value),
+      body: widgetOptions.elementAt(selectedIndex.value),
       bottomNavigationBar: BottomNavigationBar(
           unselectedItemColor: AppColorsLight.baseContent,
           selectedItemColor: AppColorsLight.primary,
