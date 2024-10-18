@@ -42,103 +42,116 @@ class ScannerUtils {
     return contours;
   }
 
-  List<List<cv.Point>> getFirstSection(
-      List<List<cv.Point>> contours, int lastPosY) {
-    List<List<List<cv.Point>>> studentsRows = [];
-    var y = lastPosY;
-    var x = 0;
-    var bubbleHeight = 20;
+  List<List<List<cv.Point>>> getFirstSection(List<List<cv.Point>> contours) {
+    List<List<List<cv.Point>>> finalRows = [];
+    List<List<List<cv.Point>>> sortedRows = [];
+    List<List<List<cv.Point>>> unsortedRows = [];
     List<List<cv.Point>> tempList = [];
+    var startingYPos = 220;
+    var bubbleHeight = 20;
+    var gap = 30;
 
-    print("LAST POS IS $y");
+    for (int i = 0; i < contours.length; i++) {
+      var bound = cv.boundingRect(VecPoint.fromList(contours[i]));
 
-    var count = 0;
-
-    for (var contour in contours) {
-      var bound = cv.boundingRect(VecPoint.fromList(contour));
-
-      // skips 50
-      if (bound.y < lastPosY - 50) {
-        y = bound.y ~/ 10 * 10 + 20;
-        continue;
-      }
-
-      if (studentsRows.length == 10) {
-        // return SectionField(studentsRows, y);
+      if (unsortedRows.length == 10) {
         break;
       }
 
-      // Check if we have reached a new row
-      if (bound.y >= y) {
-        // Only add the row if it contains contours
-        if (tempList.isNotEmpty) {
-          // split rows
-          
-
-          studentsRows.add(tempList);
-          tempList = [];
-        }
-
-        // Update the new y boundary
-        x = 0;
-        y = bound.y ~/ 10 * 10 + 20;
+      if (bound.y >= startingYPos && bound.y < (startingYPos + bubbleHeight)) {
+        tempList.add(contours[i]);
+        continue;
       }
 
-      if (tempList.length < 15) {
-        tempList.add(contour);
+      if (bound.y > (startingYPos + bubbleHeight)) {
+        unsortedRows.add(tempList);
+        tempList = [];
+        startingYPos += 20;
+
+        // check if within boundaries
+        if (bound.y >= startingYPos &&
+            bound.y < (startingYPos + bubbleHeight)) {
+          tempList.add(contours[i]);
+          continue;
+        }
       }
     }
 
-    // sort each row and split them
+    // sorting rows
+    for (var row in unsortedRows) {
+      var sorted = ScannerUtils().sortContours(row, "left-to-right");
 
-    print("TOTAL ELEMENTS AaFTER: $count");
-    return studentsRows[0];
+      sortedRows.add(sorted);
+    }
+
+    // split
+    for (var row in sortedRows) {
+      List<List<cv.Point>> tempList = [];
+
+      for (int i = 0; i < row.length; i++) {
+        var bound = cv.boundingRect(VecPoint.fromList(row[i]));
+        var nextIdx = i + 1;
+
+        if (nextIdx != row.length) {
+          var nextBnd = cv.boundingRect(VecPoint.fromList(row[nextIdx]));
+
+          if ((nextBnd.x - bound.x) > gap) {
+            tempList.add(row[i]);
+            finalRows.add(tempList);
+            tempList = [];
+          } else {
+            tempList.add(row[i]);
+          }
+        } else {
+          tempList.add(row[i]);
+          finalRows.add(tempList);
+          tempList = [];
+        }
+      }
+    }
+
+    print("UNSORTED RIWS");
+    print(finalRows[0].length);
+    return finalRows;
   }
 
   // pass sorted y
   SectionField getStudentIdSection(List<List<cv.Point>> contours) {
     List<List<List<cv.Point>>> studentsRows = [];
-    var y = 0;
-    var bubbleHeight = 20;
     List<List<cv.Point>> tempList = [];
+    var bubbleHeight = 20;
+    var startingYPos = 40;
 
-    for (var contour in contours) {
-      var bound = cv.boundingRect(VecPoint.fromList(contour));
+    for (int i = 0; i < contours.length; i++) {
+      var bound = cv.boundingRect(VecPoint.fromList(contours[i]));
 
       if (studentsRows.length == 5) {
-        return SectionField(studentsRows, y);
+        break;
       }
 
-      // Initialize the first row
-      if (y == 0) {
-        y = bound.y ~/ 10 * 10 + 20;
-        tempList.add(contour);
+      // check if within boundaries
+      if (bound.y >= startingYPos && bound.y < (startingYPos + bubbleHeight)) {
+        // print("ADDED");
+        // print(bound.y);
+        tempList.add(contours[i]);
         continue;
       }
 
-      // Check if we have reached a new row
-      if (bound.y >= y) {
-        // Only add the row if it contains contours
-        if (tempList.isNotEmpty) {
-          studentsRows.add(tempList);
-          tempList = [];
+      if (bound.y > (startingYPos + bubbleHeight)) {
+        studentsRows.add(tempList);
+        tempList = [];
+        startingYPos += 20;
+
+        // check if within boundaries
+        if (bound.y >= startingYPos &&
+            bound.y < (startingYPos + bubbleHeight)) {
+          tempList.add(contours[i]);
+          continue;
         }
-
-        // Update the new y boundary
-        y = bound.y ~/ 10 * 10 + 20;
-      }
-
-      // Add contour to the current row if we have not exceeded the limit
-      if (tempList.length < 10) {
-        tempList.add(contour);
       }
     }
 
-    // Add the last row if it contains contours
-    if (tempList.isNotEmpty) {
-      studentsRows.add(tempList);
-    }
-
-    return SectionField(studentsRows, y);
+    // sort all rows
+    return SectionField(studentsRows, startingYPos + bubbleHeight);
   }
 }

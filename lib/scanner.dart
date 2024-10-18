@@ -109,9 +109,9 @@ class Scanner {
     // sort contours from top to bottom
     var sorted = ScannerUtils().sortContours(bubbles, 'top-to-bottom');
     var studSection = ScannerUtils().getStudentIdSection(sorted);
-    var firstPart =
-        ScannerUtils().getFirstSection(sorted, studSection.lastYPos);
+    var firstPart = ScannerUtils().getFirstSection(sorted);
     var studentid = "";
+    var firstPartAnswer = "";
 
     // determine the student id
     for (var studRow in studSection.rows) {
@@ -119,13 +119,23 @@ class Scanner {
 
       var num = applyMask(sortedRow, thresh);
       studentid += num.toString();
-      print("FILLED BUBBLES");
-      print(num);
     }
 
-    print("SEE");
-    print(sorted.length);
+    // determine answers for first part
+    for (var row in firstPart) {
+      var sortedRow = ScannerUtils().sortContours(row, "left-to-right");
+      print("LISTEN");
+      print(row.length);
+
+      var num = applyMask(sortedRow, thresh);
+
+      if (num != null) {
+        firstPartAnswer += String.fromCharCode(97 + num);
+      }
+    }
+
     print("YOUR STUDENT ID IS: $studentid");
+    print("YOUR FP ANSWER IS: $firstPartAnswer");
 
     Scalar color = Scalar(0, 255, 0);
     // return cv.drawContoursAsync(orig, VecVecPoint.fromList(stud[0]), -1, color,
