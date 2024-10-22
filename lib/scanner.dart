@@ -108,34 +108,69 @@ class Scanner {
 
     // sort contours from top to bottom
     var sorted = ScannerUtils().sortContours(bubbles, 'top-to-bottom');
-    var studSection = ScannerUtils().getStudentIdSection(sorted);
-    var firstPart = ScannerUtils().getFirstSection(sorted);
+    var studSection = await ScannerUtils().getStudentIdSection(sorted);
+    var firstPart = await ScannerUtils().getFirstSection(sorted);
+    var secondPart = await ScannerUtils().getSecondSection(sorted);
     var studentid = "";
     var firstPartAnswer = "";
+    var secondPartAnswer = "";
 
     // determine the student id
     for (var studRow in studSection.rows) {
       var sortedRow = ScannerUtils().sortContours(studRow, "left-to-right");
 
-      var num = applyMask(sortedRow, thresh);
-      studentid += num.toString();
+      var num = await applyMask(sortedRow, thresh);
+
+      if (num != null) {
+        if (num < 0) {
+          studentid += "?";
+        } else {
+          studentid += num.toString();
+        }
+      }
     }
 
+    var count_first = 1;
     // determine answers for first part
     for (var row in firstPart) {
       var sortedRow = ScannerUtils().sortContours(row, "left-to-right");
-      print("LISTEN");
-      print(row.length);
 
-      var num = applyMask(sortedRow, thresh);
+      var num = await applyMask(sortedRow, thresh);
+      print("YOUR NUM IS: $num");
 
       if (num != null) {
-        firstPartAnswer += String.fromCharCode(97 + num);
+        if (num < 0) {
+          firstPartAnswer += "$count_first - ? ";
+        } else {
+          firstPartAnswer += "$count_first - ${String.fromCharCode(97 + num)} ";
+        }
+        count_first++;
+      }
+    }
+
+    var count_sec = 1;
+    // determine answers for second part
+    for (var row in secondPart) {
+      var sortedRow = ScannerUtils().sortContours(row, "left-to-right");
+
+      var num = await applyMask(sortedRow, thresh);
+
+      if (num != null) {
+        if (num < 0) {
+          secondPartAnswer += "$count_sec - ? ";
+        } else {
+          secondPartAnswer += "$count_sec - ${String.fromCharCode(97 + num)} ";
+        }
+
+        count_sec++;
       }
     }
 
     print("YOUR STUDENT ID IS: $studentid");
     print("YOUR FP ANSWER IS: $firstPartAnswer");
+    print(firstPart.length);
+    print("YOUR SP ANSWER IS: $secondPartAnswer");
+    print(secondPart.length);
 
     Scalar color = Scalar(0, 255, 0);
     // return cv.drawContoursAsync(orig, VecVecPoint.fromList(stud[0]), -1, color,
@@ -145,7 +180,51 @@ class Scanner {
   }
 
   // returns index of filled bubble
-  int? applyMask(List<List<cv.Point>> contours, cv.Mat thresh) {
+  Future<int?> applyMask(List<List<cv.Point>> contours, cv.Mat thresh) async {
+    int? bubbledCount;
+    int? bubbledIndex;
+    int validBubbles = 0;
+
+    for (int j = 0; j < contours.length; j++) {
+      var contour = contours[j];
+
+      // Construct a mask that reveals only the current "bubble" for the question
+      var mask = cv.Mat.zeros(thresh.rows, thresh.cols, MatType.CV_8UC1);
+      cv.drawContours(
+          mask, VecVecPoint.fromList([contour]), -1, cv.Scalar.all(255),
+          thickness: cv.FILLED);
+
+      // Apply the mask to the thresholded image
+      var masked = await cv.bitwiseANDAsync(thresh, thresh, mask: mask);
+
+      // Count the number of non-zero pixels in the bubble area
+      int total = await cv.countNonZeroAsync(masked);
+
+      // print("NONZERO: $total");
+
+      // Check if the current total has a larger number of non-zero pixels
+      if (total >= 140) {
+        validBubbles++;
+
+        if (bubbledCount == null || total > bubbledCount) {
+          bubbledCount = total;
+          bubbledIndex = j;
+        }
+      }
+    }
+
+    // At this point, bubbledCount contains the max non-zero count,
+    // and bubbledIndex contains the index of the bubbled contour
+    // print("Bubbled Index: $bubbledIndex, Count: $bubbledCount");
+    if (validBubbles > 1 || validBubbles == 0) {
+      return -1;
+    }
+
+    return bubbledIndex;
+  }
+
+  Future<cv.Mat> applyMaskTest(
+      List<List<cv.Point>> contours, cv.Mat thresh) async {
     int? bubbledCount;
     int? bubbledIndex;
 
@@ -159,23 +238,13 @@ class Scanner {
           thickness: cv.FILLED);
 
       // Apply the mask to the thresholded image
-      var masked = cv.bitwiseAND(thresh, thresh, mask: mask);
+      var masked = await cv.bitwiseANDAsync(thresh, thresh, mask: mask);
 
-      // Count the number of non-zero pixels in the bubble area
-      int total = cv.countNonZero(masked);
-
-      // print("NONZERO: $total");
-
-      // Check if the current total has a larger number of non-zero pixels
-      if (bubbledCount == null || total > bubbledCount) {
-        bubbledCount = total;
-        bubbledIndex = j;
+      if (j == 0) {
+        return masked;
       }
     }
 
-    // At this point, bubbledCount contains the max non-zero count,
-    // and bubbledIndex contains the index of the bubbled contour
-    print("Bubbled Index: $bubbledIndex, Count: $bubbledCount");
-    return bubbledIndex;
+    return cv.Mat.zeros(thresh.rows, thresh.cols, MatType.CV_8UC1);
   }
 }
