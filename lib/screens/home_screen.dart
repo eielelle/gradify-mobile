@@ -4,6 +4,7 @@ import 'package:scannerv3/fragments/about_fragment.dart';
 import 'package:scannerv3/fragments/classes_fragment.dart';
 import 'package:scannerv3/fragments/exams_fragment.dart';
 import 'package:scannerv3/fragments/grade_fragment.dart';
+import 'package:scannerv3/widgets/app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -31,11 +32,25 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(41, 46, 50, 1),
-      appBar: AppBar(title: const Text("TEST")),
+      appBar: AppBar(
+        backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
+        leading: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child:
+                Image.asset('assets/images/logo.png', width: 32, height: 32)),
+        actions: [
+          Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: ElevatedButton(
+                  onPressed: () {},
+                  child: const Icon(Iconsax.logout,
+                      color: Color.fromRGBO(101, 188, 80, 1))))
+        ],
+      ),
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Color.fromRGBO(101, 188, 80, 1),
+        backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
         fixedColor: Colors.white,
         showUnselectedLabels: true,
         currentIndex: _currentIndex,
