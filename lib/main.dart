@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scannerv3/camera_screen.dart';
+import 'package:scannerv3/screens/welcome_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const CameraScreen(),
+      home: const WelcomeScreen(),
     );
   }
 }

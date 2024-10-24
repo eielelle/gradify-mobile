@@ -51,7 +51,7 @@ class ScannerUtils {
     List<List<cv.Point>> tempList = [];
     var startingYPos = 220;
     var bubbleHeight = 20;
-    var gap = 30;
+    var gap = 60;
 
     for (int i = 0; i < contours.length; i++) {
       var bound = await cv.boundingRectAsync(VecPoint.fromList(contours[i]));
@@ -126,13 +126,13 @@ class ScannerUtils {
     List<List<cv.Point>> tempList = [];
     var startingYPos = 480;
     var bubbleHeight = 20;
-    var gap = 50;
+    var gap = 90;
 
     for (int i = 0; i < contours.length; i++) {
       var bound = await cv.boundingRectAsync(VecPoint.fromList(contours[i]));
 
-      if (unsortedRows.length == 10) {
-        break;
+      if (unsortedRows.length == 9 && tempList.isNotEmpty) {
+        unsortedRows.add(tempList);
       }
 
       if (bound.y >= startingYPos && bound.y < (startingYPos + bubbleHeight)) {
@@ -154,6 +154,8 @@ class ScannerUtils {
       }
     }
 
+    print("UNSORTED");
+    print(unsortedRows.length);
     // sorting rows
     for (var row in unsortedRows) {
       var sorted = ScannerUtils().sortContours(row, "left-to-right");
@@ -188,8 +190,9 @@ class ScannerUtils {
       }
     }
 
-    // print("UNSORTED RIWS");
-    // print(finalRows.length);
+    print("FINAL");
+    print(sortedRows.length);
+    print(finalRows.length);
     return finalRows;
   }
 

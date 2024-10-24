@@ -136,13 +136,17 @@ class Scanner {
       var sortedRow = ScannerUtils().sortContours(row, "left-to-right");
 
       var num = await applyMask(sortedRow, thresh);
-      print("YOUR NUM IS: $num");
 
       if (num != null) {
         if (num < 0) {
-          firstPartAnswer += "$count_first - ? ";
+          if (num == -1) {
+            firstPartAnswer += "$count_first - MULTIPLE SHADES\n";
+          } else if (num == -2) {
+            firstPartAnswer += "$count_first - UNDETECTED OR NO ANSWER\n";
+          }
         } else {
-          firstPartAnswer += "$count_first - ${String.fromCharCode(97 + num)} ";
+          firstPartAnswer +=
+              "$count_first - ${String.fromCharCode(97 + num)}\n";
         }
         count_first++;
       }
@@ -157,9 +161,13 @@ class Scanner {
 
       if (num != null) {
         if (num < 0) {
-          secondPartAnswer += "$count_sec - ? ";
+          if (num == -1) {
+            secondPartAnswer += "$count_sec - MULTIPLE SHADES\n";
+          } else if (num == -2) {
+            secondPartAnswer += "$count_sec - UNDETECTED OR NO ANSWER\n";
+          }
         } else {
-          secondPartAnswer += "$count_sec - ${String.fromCharCode(97 + num)} ";
+          secondPartAnswer += "$count_sec - ${String.fromCharCode(97 + num)}\n";
         }
 
         count_sec++;
@@ -216,8 +224,12 @@ class Scanner {
     // At this point, bubbledCount contains the max non-zero count,
     // and bubbledIndex contains the index of the bubbled contour
     // print("Bubbled Index: $bubbledIndex, Count: $bubbledCount");
-    if (validBubbles > 1 || validBubbles == 0) {
+    if (validBubbles > 1) {
       return -1;
+    }
+
+    if (validBubbles == 0) {
+      return -2;
     }
 
     return bubbledIndex;
