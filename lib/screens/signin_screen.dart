@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scannerv3/screens/home_screen.dart';
 
 class SigninScreen extends StatefulWidget {
   const SigninScreen({super.key});
@@ -64,7 +65,7 @@ class _SigninScreenState extends State<SigninScreen> {
                             Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const SigninScreen()),
+                                    builder: (context) => const HomeScreen()),
                                 (route) => false);
                           },
                           style: ElevatedButton.styleFrom(
