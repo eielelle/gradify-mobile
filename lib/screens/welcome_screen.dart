@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scannerv3/screens/signin_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -29,19 +30,24 @@ class WelcomeScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 30),
-                  ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(8.0), // Set border radius
-                        ),
-                      ),
-                      child: const Text(
-                        "Get Started",
-                        style: TextStyle(color: Colors.white),
-                      ))
+                  SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const SigninScreen()), (route) => false);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromRGBO(101, 188, 80, 1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8.0), // Set border radius
+                            ),
+                          ),
+                          child: const Text(
+                            "Get Started",
+                            style: TextStyle(color: Colors.white),
+                          )))
                 ],
               ))
         ],
