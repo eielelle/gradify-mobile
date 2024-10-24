@@ -4,7 +4,6 @@ import 'package:scannerv3/fragments/about_fragment.dart';
 import 'package:scannerv3/fragments/classes_fragment.dart';
 import 'package:scannerv3/fragments/exams_fragment.dart';
 import 'package:scannerv3/fragments/grade_fragment.dart';
-import 'package:scannerv3/widgets/app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
