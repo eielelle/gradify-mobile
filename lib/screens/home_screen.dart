@@ -57,7 +57,8 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Iconsax.document), label: "Exams"),
           BottomNavigationBarItem(icon: Icon(Iconsax.people), label: "Classes"),
-          BottomNavigationBarItem(icon: Icon(Iconsax.graph), label: "Grades"),
+          BottomNavigationBarItem(
+              icon: Icon(Iconsax.profile_2user), label: "Students"),
           BottomNavigationBarItem(
               icon: Icon(Iconsax.profile_circle), label: "About"),
         ],

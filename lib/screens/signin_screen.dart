@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:scannerv3/screens/home_screen.dart';
+import 'package:scannerv3/values/api_endpoints.dart';
 
 class SigninScreen extends StatefulWidget {
   const SigninScreen({super.key});
@@ -9,6 +11,88 @@ class SigninScreen extends StatefulWidget {
 }
 
 class _SigninScreenState extends State<SigninScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  String _errorMessage = "";
+  bool _loading = false;
+  final Dio _dio = Dio();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> signin() async {
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      final res = await _dio.post(ApiEndpoints.signIn, data: {
+        "user": {"email": email, "password": password}
+      });
+
+      if (res.statusCode == 200) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = "";
+            _loading = false;
+          });
+
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (route) => false);
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _errorMessage = "Invalid Email or Password";
+            _loading = false;
+          });
+
+          _showErrorDialog(_errorMessage);
+        }
+      }
+    } on DioException catch (error) {
+      if (mounted) {
+        // Handle errors from Dio
+        setState(() {
+          _errorMessage =
+              error.response?.data['status']['message'] ?? 'Error signing in';
+          _loading = false;
+        });
+
+        _showErrorDialog(_errorMessage);
+      }
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Authentication Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,8 +114,9 @@ class _SigninScreenState extends State<SigninScreen> {
                       style:
                           TextStyle(color: Color.fromRGBO(187, 187, 187, 1))),
                   const SizedBox(height: 20),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         hintStyle:
                             TextStyle(color: Color.fromRGBO(187, 187, 187, 1)),
@@ -44,8 +129,9 @@ class _SigninScreenState extends State<SigninScreen> {
                         filled: true),
                   ),
                   const SizedBox(height: 14),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         hintStyle:
                             TextStyle(color: Color.fromRGBO(187, 187, 187, 1)),
@@ -62,11 +148,7 @@ class _SigninScreenState extends State<SigninScreen> {
                   SizedBox(
                       child: ElevatedButton(
                           onPressed: () {
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const HomeScreen()),
-                                (route) => false);
+                            signin();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
@@ -76,10 +158,12 @@ class _SigninScreenState extends State<SigninScreen> {
                                   8.0), // Set border radius
                             ),
                           ),
-                          child: const Text(
-                            "SIGN IN",
-                            style: TextStyle(color: Colors.white),
-                          )))
+                          child: _loading
+                              ? CircularProgressIndicator()
+                              : const Text(
+                                  "SIGN IN",
+                                  style: TextStyle(color: Colors.white),
+                                )))
                 ],
               ))
         ],

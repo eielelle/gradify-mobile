@@ -50,7 +50,12 @@ class _ClassesFragmentState extends State<ClassesFragment> {
             ],
           ),
           const SizedBox(height: 12),
-          for (var item in list) _buildCard(item)
+          Expanded(
+              child: ListView.builder(
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    return _buildCard(list[index]);
+                  }))
         ],
       ),
     );
