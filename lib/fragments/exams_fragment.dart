@@ -1,6 +1,15 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:opencv_dart/opencv_dart.dart';
+import 'package:scannerv3/models/exam.dart';
+import 'package:scannerv3/models/quarter.dart';
 import 'package:scannerv3/models/school_exam.dart';
+import 'package:scannerv3/models/subject.dart';
+import 'package:scannerv3/utils/token_manager.dart';
+import 'package:scannerv3/values/api_endpoints.dart';
 
 class ExamsFragment extends StatefulWidget {
   const ExamsFragment({super.key});
@@ -10,19 +19,56 @@ class ExamsFragment extends StatefulWidget {
 }
 
 class _ExamsFragmentState extends State<ExamsFragment> {
-  final List<SchoolExam> list = [];
+  final List<Exam> list = [];
+  String _errorMessage = "";
+  bool _loading = false;
+  final Dio _dio = Dio();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
+    fetchExams();
+  }
+
+  Future<void> fetchExams() async {
     setState(() {
-      list.add(SchoolExam("QUIZ 1", 12, 7));
-      list.add(SchoolExam("PRELIM EXAM 2", 2, 12));
-      list.add(SchoolExam("02 Act 01", 16, 3));
-      list.add(SchoolExam("Quiz 1", 19, 9));
+      _loading = true;
     });
+
+    try {
+      final token = await TokenManager().getAuthToken();
+      if (token != null) {
+        final res = await _dio.get(ApiEndpoints.getExams,
+            options: Options(headers: {'Authorization': token}));
+
+        if (res.statusCode == 200) {
+          final exams = res.data["exams"] ?? [];
+
+          for (var exam in exams) {
+            final attr = exam["attributes"];
+            final jsonQtr = attr["quarter"];
+            final jsonSubject = attr["subject"];
+
+            final quarter = Quarter(id: jsonQtr["id"], name: jsonQtr["name"]);
+            final subject = Subject(
+                id: jsonSubject["id"],
+                name: jsonSubject["name"],
+                description: jsonSubject["description"],
+                createdAt: DateTime.parse(jsonSubject["created_at"]));
+
+            setState(() {
+              list.add(Exam(quarter, subject,
+                  id: attr["id"],
+                  name: attr["name"],
+                  answerKey: attr["answer_key"],
+                  createdAt: DateTime.parse(attr["created_at"])));
+            });
+          }
+        }
+      }
+    } on DioException catch (error) {}
   }
 
   @override
@@ -61,18 +107,19 @@ class _ExamsFragmentState extends State<ExamsFragment> {
     );
   }
 
-  Widget _buildCard(SchoolExam sc) {
+  Widget _buildCard(Exam sc) {
     return Card(
       child: ListTile(
-        title: Text(sc.name),
-        subtitle: Row(
-          children: [
-            Row(children: [Text("Classes: "), Text(sc.classes.toString())]),
-            SizedBox(width: 12),
-            Row(children: [Icon(Iconsax.book), Text(sc.subjects.toString())])
-          ],
-        ),
-      ),
+          title: Text(sc.name),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 12),
+              Text(sc.quarter.name),
+              const Divider(),
+              Text(sc.subject.name)
+            ],
+          )),
     );
   }
 }

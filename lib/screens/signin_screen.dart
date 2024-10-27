@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:scannerv3/screens/home_screen.dart';
+import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
 
 class SigninScreen extends StatefulWidget {
@@ -38,6 +39,9 @@ class _SigninScreenState extends State<SigninScreen> {
       });
 
       if (res.statusCode == 200) {
+        final token = res.headers.value('Authorization');
+        await TokenManager().saveToken(token);
+        
         if (mounted) {
           setState(() {
             _errorMessage = "";
