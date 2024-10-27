@@ -59,6 +59,8 @@ class _ExamsFragmentState extends State<ExamsFragment> {
                 createdAt: DateTime.parse(jsonSubject["created_at"]));
 
             setState(() {
+              _loading = false;
+
               list.add(Exam(quarter, subject,
                   id: attr["id"],
                   name: attr["name"],
@@ -68,7 +70,36 @@ class _ExamsFragmentState extends State<ExamsFragment> {
           }
         }
       }
-    } on DioException catch (error) {}
+    } on DioException catch (error) {
+      // Handle errors from Dio
+      setState(() {
+        _errorMessage =
+            error.response?.data['errors'][0] ?? 'Error fetching data';
+        _loading = false;
+      });
+
+      _showErrorDialog(_errorMessage);
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Fetch Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -97,11 +128,13 @@ class _ExamsFragmentState extends State<ExamsFragment> {
           ),
           const SizedBox(height: 12),
           Expanded(
-              child: ListView.builder(
-                  itemCount: list.length,
-                  itemBuilder: (context, index) {
-                    return _buildCard(list[index]);
-                  }))
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: list.length,
+                      itemBuilder: (context, index) {
+                        return _buildCard(list[index]);
+                      }))
         ],
       ),
     );
