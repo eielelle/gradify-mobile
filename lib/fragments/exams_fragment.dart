@@ -8,6 +8,7 @@ import 'package:scannerv3/models/exam.dart';
 import 'package:scannerv3/models/quarter.dart';
 import 'package:scannerv3/models/school_exam.dart';
 import 'package:scannerv3/models/subject.dart';
+import 'package:scannerv3/screens/exam_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
 
@@ -68,6 +69,10 @@ class _ExamsFragmentState extends State<ExamsFragment> {
                   createdAt: DateTime.parse(attr["created_at"])));
             });
           }
+
+          setState(() {
+            _loading = false;
+          });
         }
       }
     } on DioException catch (error) {
@@ -80,6 +85,11 @@ class _ExamsFragmentState extends State<ExamsFragment> {
 
       _showErrorDialog(_errorMessage);
     }
+  }
+
+  void tapExam(Exam exam) {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => ExamScreen(exam: exam)));
   }
 
   void _showErrorDialog(String message) {
@@ -143,6 +153,9 @@ class _ExamsFragmentState extends State<ExamsFragment> {
   Widget _buildCard(Exam sc) {
     return Card(
       child: ListTile(
+          onTap: () {
+            tapExam(sc);
+          },
           title: Text(sc.name),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
