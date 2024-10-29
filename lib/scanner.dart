@@ -1,5 +1,6 @@
 import 'package:opencv_dart/core.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
+import 'package:scannerv3/models/scan.dart';
 import 'package:scannerv3/scanner_utils.dart';
 
 class Scanner {
@@ -88,7 +89,7 @@ class Scanner {
   }
 
   // find the bubbles and sort them
-  Future<Mat> findBubbles(cv.Mat orig, cv.Mat thresh) async {
+  Future<Scan> findBubbles(cv.Mat orig, cv.Mat thresh) async {
     (VecVecPoint, cv.Mat) cnts =
         cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
     List<List<Point>> bubbles = [];
@@ -140,13 +141,16 @@ class Scanner {
       if (num != null) {
         if (num < 0) {
           if (num == -1) {
-            firstPartAnswer += "$count_first - MULTIPLE SHADES\n";
+            // firstPartAnswer += "$count_first - MULTIPLE SHADES\n";
+            firstPartAnswer += "?";
           } else if (num == -2) {
-            firstPartAnswer += "$count_first - UNDETECTED OR NO ANSWER\n";
+            // firstPartAnswer += "$count_first - UNDETECTED OR NO ANSWER\n";
+            firstPartAnswer += "?";
           }
         } else {
-          firstPartAnswer +=
-              "$count_first - ${String.fromCharCode(97 + num)}\n";
+          // firstPartAnswer +=
+          //     "$count_first - ${String.fromCharCode(97 + num)}\n";
+          firstPartAnswer += String.fromCharCode(97 + num).toUpperCase();
         }
         count_first++;
       }
@@ -162,16 +166,28 @@ class Scanner {
       if (num != null) {
         if (num < 0) {
           if (num == -1) {
-            secondPartAnswer += "$count_sec - MULTIPLE SHADES\n";
+            // secondPartAnswer += "$count_sec - MULTIPLE SHADES\n";
+            secondPartAnswer += "?";
           } else if (num == -2) {
-            secondPartAnswer += "$count_sec - UNDETECTED OR NO ANSWER\n";
+            // secondPartAnswer += "$count_sec - UNDETECTED OR NO ANSWER\n";
+            secondPartAnswer += "?";
           }
         } else {
-          secondPartAnswer += "$count_sec - ${String.fromCharCode(97 + num)}\n";
+          // secondPartAnswer += "$count_sec - ${String.fromCharCode(97 + num)}\n";
+          secondPartAnswer += String.fromCharCode(97 + num).toUpperCase();
         }
 
         count_sec++;
       }
+    }
+
+    // length
+    while (firstPartAnswer.length < 30) {
+      firstPartAnswer += "?";
+    }
+
+    while (secondPartAnswer.length < 20) {
+      secondPartAnswer += "?";
     }
 
     print("YOUR STUDENT ID IS: $studentid");
@@ -183,8 +199,14 @@ class Scanner {
     Scalar color = Scalar(0, 255, 0);
     // return cv.drawContoursAsync(orig, VecVecPoint.fromList(stud[0]), -1, color,
     //     thickness: 2);
-    return cv.drawContoursAsync(orig, VecVecPoint.fromList(bubbles), -1, color,
-        thickness: 2);
+    return Scan(
+        studentid,
+        firstPartAnswer,
+        secondPartAnswer,
+        await cv.drawContoursAsync(
+            orig, VecVecPoint.fromList(bubbles), -1, color,
+            thickness: 2),
+        firstPartAnswer + secondPartAnswer);
   }
 
   // returns index of filled bubble

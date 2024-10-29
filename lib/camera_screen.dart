@@ -1,10 +1,12 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:scannerv3/image_preview.dart';
+import 'package:scannerv3/models/exam.dart';
 import 'package:scannerv3/overlay.dart';
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+  final Exam exam;
+  const CameraScreen({super.key, required this.exam});
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -55,9 +57,6 @@ class _CameraScreenState extends State<CameraScreen> {
       // Capture the image
       final image = await _controller.takePicture();
 
-      // Process the image (e.g., convert to grayscale for OpenCV)
-      // await _processImage(image.path);
-
       // Show a simple alert dialog when done
       if (mounted) {
         showDialog(
@@ -73,7 +72,8 @@ class _CameraScreenState extends State<CameraScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => ImagePreviewScreen(
-                                      imagePath: image.path)));
+                                      imagePath: image.path,
+                                      exam: widget.exam)));
                         },
                         child: const Text('OK'))
                   ]);
@@ -87,7 +87,10 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Capture Bubble Sheet')),
+      backgroundColor: const Color.fromRGBO(41, 46, 50, 1),
+      appBar: AppBar(
+          title: Text('Capture Bubble Sheet'),
+          backgroundColor: const Color.fromRGBO(101, 188, 80, 1)),
       body: _camera == null
           ? const Center(
               child:

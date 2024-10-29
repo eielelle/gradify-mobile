@@ -3,6 +3,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:scannerv3/camera_screen.dart';
 import 'package:scannerv3/models/exam.dart';
 import 'package:scannerv3/screens/answer_key_screen.dart';
+import 'package:scannerv3/screens/results_screen.dart';
 import 'package:scannerv3/utils/answer_key_decoder.dart';
 
 class ExamScreen extends StatelessWidget {
@@ -16,7 +17,7 @@ class ExamScreen extends StatelessWidget {
       {
         'label': 'Scan Paper',
         'icon': Icons.document_scanner_outlined,
-        'route': const CameraScreen()
+        'route': CameraScreen(exam: exam)
       },
       {
         'label': 'View Answer Key',
