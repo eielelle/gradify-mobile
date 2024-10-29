@@ -41,7 +41,7 @@ class _SigninScreenState extends State<SigninScreen> {
       if (res.statusCode == 200) {
         final token = res.headers.value('Authorization');
         await TokenManager().saveToken(token);
-        
+
         if (mounted) {
           setState(() {
             _errorMessage = "";

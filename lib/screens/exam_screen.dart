@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:scannerv3/camera_screen.dart';
 import 'package:scannerv3/models/exam.dart';
+import 'package:scannerv3/screens/answer_key_screen.dart';
+import 'package:scannerv3/utils/answer_key_decoder.dart';
 
 class ExamScreen extends StatelessWidget {
   final Exam exam;
@@ -10,8 +13,17 @@ class ExamScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> buttonData = [
-      {'label': 'Scan Paper', 'icon': Icons.document_scanner_outlined},
-      {'label': 'View Answer Key', 'icon': Iconsax.key},
+      {
+        'label': 'Scan Paper',
+        'icon': Icons.document_scanner_outlined,
+        'route': const CameraScreen()
+      },
+      {
+        'label': 'View Answer Key',
+        'icon': Iconsax.key,
+        'route': AnswerKeyScreen(
+            answerKey: AnswerKeyDecoder().decodeKey(exam.answerKey))
+      },
       {'label': 'View Responses', 'icon': Icons.list_alt},
       {'label': 'Item Analysis', 'icon': Icons.analytics},
       {'label': 'Statistics', 'icon': Iconsax.graph},
@@ -68,26 +80,34 @@ class ExamScreen extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          buttonData[index]['icon'],
-                          size: 40,
+                    elevation: 4,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    buttonData[index]['route']));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              buttonData[index]['icon'],
+                              size: 40,
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              buttonData[index]['label'],
+                              style: TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          buttonData[index]['label'],
-                          style: TextStyle(fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                      ),
+                    )),
               );
             },
           ))
