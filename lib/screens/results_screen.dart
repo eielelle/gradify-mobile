@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:scannerv3/models/exam.dart';
+import 'package:scannerv3/screens/edit_response_screen.dart';
+import 'package:scannerv3/widgets/results_options_widget.dart';
 
 class ResultsScreen extends StatefulWidget {
   final List<String> answer;
   final List<String> answerKey;
-  final String studentId;
   final Exam exam;
+  final TextEditingController _controller = TextEditingController();
+  String studentId;
   int score = 0;
   int detected = 0;
 
@@ -26,8 +29,16 @@ class _ResultsScreenState extends State<ResultsScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    widget._controller.value = TextEditingValue(text: widget.studentId);
     setScore();
     setDetected();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    widget._controller.dispose();
+    super.dispose();
   }
 
   void setDetected() {
@@ -46,12 +57,45 @@ class _ResultsScreenState extends State<ResultsScreen> {
         score++;
       }
     }
-
-    print("SCORE: ${score}");
-
     setState(() {
       widget.score = score;
     });
+  }
+
+  void _editStudId(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Edit Student ID"),
+            content: TextField(
+              controller: widget._controller,
+              keyboardType: TextInputType.number,
+              maxLength: 5,
+              decoration: InputDecoration(counterText: ""),
+            ),
+            actions: [
+              TextButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('OK'),
+                onPressed: widget._controller.text.isEmpty
+                    ? null
+                    : () {
+                        // Handle the number input
+                        setState(() {
+                          widget.studentId = widget._controller.text;
+                          Navigator.of(context).pop();
+                        });
+                      },
+              ),
+            ],
+          );
+        });
   }
 
   @override
@@ -62,55 +106,90 @@ class _ResultsScreenState extends State<ResultsScreen> {
         backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
         title: const Text("Answer Key"),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == "Edit Response") {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => EditResponseScreen(
+                            answer: widget.answer,
+                            answerKey: widget.answerKey,
+                            updateAnswer: (String a, int b) => {
+                                  setState(() {
+                                    widget.answer[b] = a;
+                                  }),
+                                  setDetected(),
+                                  setScore()
+                                })));
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return {'Edit Response', 'Save Response', 'Discard and Rescan'}
+                  .map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+            icon: const Icon(Icons.more_vert), // Icon for the menu
+          )
+        ],
       ),
       body: Column(
         children: [
           Container(
             color: const Color.fromRGBO(101, 188, 80, 1),
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(children: [
-                  Text("Exam Name:",
+                  const Text("Exam Name:",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   Text(widget.exam.name)
                 ]),
                 Row(children: [
-                  Text("Responses:",
+                  const Text("Responses:",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   Text(12.toString())
                 ]),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Text(widget.exam.quarter.name,
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Divider(),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Divider(),
                 Text(widget.exam.subject.name,
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 SizedBox(height: 20),
                 Row(
                   children: [
-                    Text("Student ID: ",
+                    const Text("Student ID: ",
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     Text(widget.studentId),
-                    IconButton(onPressed: () {}, icon: Icon(Iconsax.edit))
+                    IconButton(
+                        onPressed: () {
+                          _editStudId(context);
+                        },
+                        icon: Icon(Iconsax.edit))
                   ],
                 ),
                 Row(
                   children: [
-                    Text("Detected Bubbles: ",
+                    const Text("Detected Bubbles: ",
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     Text("${widget.detected}/50"),
                   ],
                 ),
                 Row(
                   children: [
-                    Text("Score: ",
+                    const Text("Score: ",
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     Text("${widget.score}/50"),
                   ],
@@ -127,7 +206,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         child: Row(
                           children: [
                             Text("${index + 1}: ",
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 24,
                                     color: Colors.white)),

@@ -75,7 +75,35 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                 return CircularProgressIndicator();
               } else if (snapshot.hasError) {
                 // Show an error message if something went wrong
-                return Text('Error: ${snapshot.error}');
+                return Container(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Document not recognized",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 24,
+                                color: Colors.white)),
+                        const Text(
+                            "The document is not recognized as a valid paper. Make sure that:",
+                            style: TextStyle(color: Colors.white)),
+                        SizedBox(height: 12),
+                        _bulletItem(
+                            "Ensure the document is a supported format."),
+                        _bulletItem(
+                            "Make sure the document is completely flat and not wrinkled or folded."),
+                        _bulletItem(
+                            "Scan in a well-lit area to avoid shadows or glare"),
+                        _bulletItem(
+                            "Ensure there are no other objects or distractions in the frame that could confuse the scanner."),
+                        _bulletItem(
+                            "Ensure that your phone meets the app's requirements and is compatible with the scanning feature."),
+                        _bulletItem("Use a solid background"),
+                        _bulletItem(
+                            "Make sure all four position points are captured properly")
+                      ],
+                    ));
               } else if (snapshot.hasData) {
                 // When the image data is available, show the image
                 return snapshot.data!;
@@ -85,6 +113,21 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
               }
             }),
       ),
+    );
+  }
+
+  Widget _bulletItem(String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.brightness_1,
+            size: 8.0, color: Colors.white), // Bullet point
+        SizedBox(width: 8.0), // Space between bullet and text
+        Expanded(
+            child: Text(text,
+                style: TextStyle(
+                    color: Colors.white))), // Text of the bullet point
+      ],
     );
   }
 }
