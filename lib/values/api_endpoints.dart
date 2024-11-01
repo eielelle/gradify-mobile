@@ -4,4 +4,5 @@ class ApiEndpoints {
 
   static const String signIn = "${baseUrl}teacher/sign_in";
   static const String getExams = "${baseUrl}teacher/exams";
+  static const String responses = "${baseUrl}teacher/responses";
 }

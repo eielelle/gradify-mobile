@@ -4,6 +4,7 @@ import 'package:scannerv3/camera_screen.dart';
 import 'package:scannerv3/models/exam.dart';
 import 'package:scannerv3/screens/answer_key_screen.dart';
 import 'package:scannerv3/screens/results_screen.dart';
+import 'package:scannerv3/screens/view_responses_screen.dart';
 import 'package:scannerv3/utils/answer_key_decoder.dart';
 
 class ExamScreen extends StatelessWidget {
@@ -25,7 +26,11 @@ class ExamScreen extends StatelessWidget {
         'route': AnswerKeyScreen(
             answerKey: AnswerKeyDecoder().decodeKey(exam.answerKey))
       },
-      {'label': 'View Responses', 'icon': Icons.list_alt},
+      {
+        'label': 'View Responses',
+        'icon': Icons.list_alt,
+        'route': ViewResponsesScreen()
+      },
       {'label': 'Item Analysis', 'icon': Icons.analytics},
       {'label': 'Statistics', 'icon': Iconsax.graph},
       {'label': 'Item Frequency', 'icon': Icons.timeline},

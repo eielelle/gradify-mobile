@@ -14,4 +14,9 @@ class TokenManager {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('auth_token');
   }
+
+  Future<bool> removeAuthToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.remove('auth_token');
+  }
 }

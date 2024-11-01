@@ -42,9 +42,10 @@ dependencies:
   iconsax_flutter: ^1.0.0
   dio: ^5.7.0
   shared_preferences: ^2.2.3
-  hive: ^2.2.3
-  isar_flutter_libs: ^3.1.0+1
   connectivity_plus: ^6.1.0
+  fluttertoast: ^8.2.8
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:

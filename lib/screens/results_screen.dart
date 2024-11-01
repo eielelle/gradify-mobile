@@ -1,8 +1,16 @@
+import 'dart:math';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:scannerv3/helpers/database_helper.dart';
 import 'package:scannerv3/models/exam.dart';
+import 'package:scannerv3/models/offline/response_offline.dart';
 import 'package:scannerv3/screens/edit_response_screen.dart';
+import 'package:scannerv3/utils/token_manager.dart';
+import 'package:scannerv3/values/api_endpoints.dart';
 import 'package:scannerv3/widgets/results_options_widget.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ResultsScreen extends StatefulWidget {
   final List<String> answer;
@@ -25,6 +33,10 @@ class ResultsScreen extends StatefulWidget {
 }
 
 class _ResultsScreenState extends State<ResultsScreen> {
+  bool _isSaving = false;
+  String _errorMessage = "";
+  final Dio _dio = Dio();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -52,13 +64,94 @@ class _ResultsScreenState extends State<ResultsScreen> {
   void setScore() {
     int score = 0;
 
-    for (int i = 0; i < widget.answer.length; i++) {
+    for (int i = 0; i < min(widget.answer.length, 50); i++) {
       if (widget.answer[i].contains(widget.answerKey[i])) {
         score++;
       }
     }
     setState(() {
       widget.score = score;
+    });
+  }
+
+  void _showDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> saveResponse() async {
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final token = await TokenManager().getAuthToken();
+      final data = {
+        "exam_id": widget.exam.id,
+        "student_number": widget.studentId,
+        "answer": widget.answer,
+        "score": widget.score,
+        "detected": widget.detected,
+        "image_path": ""
+      };
+
+      if (token != null) {
+        print("hey");
+        print(widget.studentId);
+        final res = await _dio.post(ApiEndpoints.responses,
+            data: data, options: Options(headers: {'Authorization': token}));
+
+        if (res.statusCode == 200) {
+          final response = res.data;
+
+          // save to db
+          ResponseOffline responseOffline = ResponseOffline(
+              response["id"],
+              response["exam_id"],
+              response["user_id"],
+              response["student_number"],
+              response["image_path"],
+              response["detected"],
+              response["score"],
+              response["answer"],
+              DateTime.parse(response["created_at"]));
+
+          // insert to db for offline access
+          final db = await DatabaseHelper().database;
+          db.insert('responses', responseOffline.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace);
+
+          _showDialog("Response Saved", "Response is saved");
+        } else {
+          _errorMessage = 'Error saving response';
+        }
+      }
+    } on DioException catch (error) {
+      setState(() {
+        _errorMessage =
+            error.response?.data['errors'][0] ?? 'Error fetching data';
+      });
+
+      _showDialog("Save Error", _errorMessage);
+    }
+
+    setState(() {
+      _isSaving = false;
     });
   }
 
@@ -128,6 +221,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
                                   setDetected(),
                                   setScore()
                                 })));
+              }
+
+              if (value == "Save Response") {
+                saveResponse();
               }
             },
             itemBuilder: (BuildContext context) {

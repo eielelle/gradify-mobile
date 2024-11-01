@@ -4,13 +4,16 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:opencv_dart/opencv_dart.dart';
+import 'package:scannerv3/helpers/database_helper.dart';
 import 'package:scannerv3/models/exam.dart';
+import 'package:scannerv3/models/offline/exam_offline.dart';
 import 'package:scannerv3/models/quarter.dart';
 import 'package:scannerv3/models/school_exam.dart';
 import 'package:scannerv3/models/subject.dart';
 import 'package:scannerv3/screens/exam_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ExamsFragment extends StatefulWidget {
   const ExamsFragment({super.key});
@@ -59,14 +62,20 @@ class _ExamsFragmentState extends State<ExamsFragment> {
                 description: jsonSubject["description"],
                 createdAt: DateTime.parse(jsonSubject["created_at"]));
 
-            setState(() {
-              _loading = false;
+            Exam examObj = Exam(quarter, subject,
+                id: attr["id"],
+                name: attr["name"],
+                answerKey: attr["answer_key"],
+                createdAt: DateTime.parse(attr["created_at"]));
 
-              list.add(Exam(quarter, subject,
-                  id: attr["id"],
-                  name: attr["name"],
-                  answerKey: attr["answer_key"],
-                  createdAt: DateTime.parse(attr["created_at"])));
+            ExamOffline examOffline = ExamOffline(examObj.id, examObj.name, examObj.answerKey, examObj.createdAt, examObj.quarter.id, examObj.subject.id);
+
+            // insert to db for offline access
+            final db = await DatabaseHelper().database;
+            db.insert('exams', examOffline.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+
+            setState(() {
+              list.add(examObj);
             });
           }
 

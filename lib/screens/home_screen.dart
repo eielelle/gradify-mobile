@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:scannerv3/fragments/about_fragment.dart';
 import 'package:scannerv3/fragments/classes_fragment.dart';
 import 'package:scannerv3/fragments/exams_fragment.dart';
 import 'package:scannerv3/fragments/grade_fragment.dart';
+import 'package:scannerv3/screens/welcome_screen.dart';
+import 'package:scannerv3/utils/token_manager.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,7 +44,25 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
               padding: const EdgeInsets.only(right: 12),
               child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    if (await TokenManager().removeAuthToken()) {
+                      if (context.mounted) {
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const WelcomeScreen()),
+                            (route) => false);
+                      }
+                    } else {
+                      Fluttertoast.showToast(
+                          msg: "Cannot sign out.",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.CENTER,
+                          timeInSecForIosWeb: 1,
+                          textColor: Colors.white,
+                          fontSize: 16.0);
+                    }
+                  },
                   child: const Icon(Iconsax.logout,
                       color: Color.fromRGBO(101, 188, 80, 1))))
         ],
