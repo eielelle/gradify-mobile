@@ -9,7 +9,10 @@ class ResponseOffline {
   final String answer;
   final DateTime createdAt;
 
-  ResponseOffline(this.id, this.examId, this.userId, this.studentNumber, this.imagePath, this.detected, this.score, this.answer, this.createdAt);
+  final String name;
+  final String email;
+
+  ResponseOffline(this.id, this.examId, this.userId, this.studentNumber, this.imagePath, this.detected, this.score, this.answer, this.createdAt, { this.name = "", this.email = "" });
 
   Map<String, dynamic> toMap() {
     return {
