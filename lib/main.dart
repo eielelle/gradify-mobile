@@ -7,7 +7,7 @@ import 'package:scannerv3/utils/token_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   runApp(const MyApp());
 }
 

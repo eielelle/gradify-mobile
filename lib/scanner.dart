@@ -182,13 +182,23 @@ class Scanner {
     }
 
     // length
-    while (firstPartAnswer.length < 30) {
-      firstPartAnswer += "?";
+    if (firstPartAnswer.length < 30) {
+      while (firstPartAnswer.length < 30) {
+        firstPartAnswer += "?";  // Append "?" until length is 30
+      }
+    } else if (firstPartAnswer.length > 30) {
+      firstPartAnswer = firstPartAnswer.substring(0, 30);  // Trim to 30 characters
     }
 
-    while (secondPartAnswer.length < 20) {
-      secondPartAnswer += "?";
+    
+    if (secondPartAnswer.length < 20) {
+      while (secondPartAnswer.length < 20) {
+        secondPartAnswer += "?";  // Append "?" until length is 20
+      }
+    } else if (secondPartAnswer.length > 20) {
+      secondPartAnswer = secondPartAnswer.substring(0, 20);  // Trim to 20 characters
     }
+
 
     print("YOUR STUDENT ID IS: $studentid");
     print("YOUR FP ANSWER IS: $firstPartAnswer");

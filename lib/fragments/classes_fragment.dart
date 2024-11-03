@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:scannerv3/models/school_class.dart';
+import 'package:scannerv3/screens/school_year_screen.dart';
 
 class ClassesFragment extends StatefulWidget {
   const ClassesFragment({super.key});
@@ -18,10 +19,10 @@ class _ClassesFragmentState extends State<ClassesFragment> {
     super.initState();
 
     setState(() {
-      list.add(SchoolClass("ABM", "", 12, 7));
-      list.add(SchoolClass("STEM", "", 2, 12));
-      list.add(SchoolClass("ICT", "", 16, 3));
-      list.add(SchoolClass("GAS", "", 19, 9));
+      list.add(SchoolClass("ABM", ""));
+      list.add(SchoolClass("STEM", ""));
+      list.add(SchoolClass("ICT", ""));
+      list.add(SchoolClass("GAS", ""));
     });
   }
 
@@ -64,15 +65,13 @@ class _ClassesFragmentState extends State<ClassesFragment> {
   Widget _buildCard(SchoolClass sc) {
     return Card(
       child: ListTile(
-        title: Text(sc.name),
-        subtitle: Row(
-          children: [
-            Row(children: [Icon(Iconsax.people), Text(sc.students.toString())]),
-            SizedBox(width: 12),
-            Row(children: [Icon(Iconsax.book), Text(sc.subjects.toString())])
-          ],
-        ),
-      ),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => SchoolYearScreen()));
+          },
+          title: Text(sc.name),
+          subtitle: Text(
+              sc.description.isEmpty ? "No description yet" : sc.description)),
     );
   }
 }

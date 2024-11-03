@@ -67,6 +67,8 @@ class _SigninScreenState extends State<SigninScreen> {
       if (mounted) {
         // Handle errors from Dio
         setState(() {
+          print("TEST");
+          print(error.response?.data);
           _errorMessage =
               error.response?.data['status']['message'] ?? 'Error signing in';
           _loading = false;

@@ -20,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _children = [
     const ExamsFragment(),
     const ClassesFragment(),
-    const GradeFragment(),
     const AboutFragment()
   ];
 
@@ -78,8 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Iconsax.document), label: "Exams"),
           BottomNavigationBarItem(icon: Icon(Iconsax.people), label: "Classes"),
-          BottomNavigationBarItem(
-              icon: Icon(Iconsax.profile_2user), label: "Students"),
           BottomNavigationBarItem(
               icon: Icon(Iconsax.profile_circle), label: "About"),
         ],

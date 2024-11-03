@@ -3,6 +3,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:scannerv3/camera_screen.dart';
 import 'package:scannerv3/models/exam.dart';
 import 'package:scannerv3/screens/answer_key_screen.dart';
+import 'package:scannerv3/screens/item_analysis_screen.dart';
 import 'package:scannerv3/screens/results_screen.dart';
 import 'package:scannerv3/screens/view_responses_screen.dart';
 import 'package:scannerv3/utils/answer_key_decoder.dart';
@@ -31,9 +32,7 @@ class ExamScreen extends StatelessWidget {
         'icon': Icons.list_alt,
         'route': ViewResponsesScreen(examId: exam.id)
       },
-      {'label': 'Item Analysis', 'icon': Icons.analytics},
-      {'label': 'Statistics', 'icon': Iconsax.graph},
-      {'label': 'Item Frequency', 'icon': Icons.timeline},
+      {'label': 'Item Analysis', 'icon': Icons.analytics, 'route': ItemAnalysisScreen()},
     ];
 
     return Scaffold(
