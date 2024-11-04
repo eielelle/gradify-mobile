@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -22,6 +25,48 @@ class _HomeScreenState extends State<HomeScreen> {
     const ClassesFragment(),
     const AboutFragment()
   ];
+  late StreamSubscription<List<ConnectivityResult>> subscription;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
+      // Received changes in available connectivity types!
+      if (result.contains(ConnectivityResult.none)) {
+        _showOfflineDialog();
+      }
+
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    subscription.cancel();
+    super.dispose();
+
+  }
+
+  void _showOfflineDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('No Internet Connection'),
+          content: Text('You are currently offline. Only local changes can be seen.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void onTappedBar(int index) {
     setState(() {

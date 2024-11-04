@@ -119,6 +119,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
         if (res.statusCode == 200) {
           final response = res.data;
 
+          print(response);
+
           // save to db
           ResponseOffline responseOffline = ResponseOffline(
               response["id"],
@@ -259,10 +261,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   Text(12.toString())
                 ]),
                 const SizedBox(height: 12),
-                Text(widget.exam.quarter.name,
+                Text(widget.exam.quarterName,
                     style: const TextStyle(fontWeight: FontWeight.bold)),
                 const Divider(),
-                Text(widget.exam.subject.name,
+                Text(widget.exam.subjectName,
                     style: const TextStyle(fontWeight: FontWeight.bold)),
                 SizedBox(height: 20),
                 Row(

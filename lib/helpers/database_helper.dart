@@ -15,15 +15,16 @@ class DatabaseHelper {
     return _database!;
   }
 
-Future<void> _createTables(Database db) async {
+  Future<void> _createTables(Database db) async {
     await db.execute(
       '''CREATE TABLE exams(
         id INTEGER PRIMARY KEY,
         name TEXT,
         answerKey TEXT,
         createdAt TEXT,
-        quarterId INTEGER,
-        subjectId INTEGER
+        quarterName TEXT,
+        subjectName TEXT,
+        responses INTEGER
       )''',
     );
 
@@ -41,13 +42,21 @@ Future<void> _createTables(Database db) async {
         FOREIGN KEY (examId) REFERENCES exams (id) ON DELETE CASCADE
       )''',
     );
+
+    await db.execute(
+      '''CREATE TABLE classes(
+        id INTEGER PRIMARY KEY,
+        name TEXT,
+        description TEXT
+      )''',
+    );
   }
 
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'database.db');
     return await openDatabase(
       path,
-      version: 11,
+      version: 18,
       onCreate: (db, version) async {
         await _createTables(db);
       },
@@ -55,6 +64,7 @@ Future<void> _createTables(Database db) async {
         // Drop existing tables and recreate them
         await db.execute('DROP TABLE IF EXISTS responses');
         await db.execute('DROP TABLE IF EXISTS exams');
+        await db.execute('DROP TABLE IF EXISTS classes');
         await _createTables(db);
       },
     );

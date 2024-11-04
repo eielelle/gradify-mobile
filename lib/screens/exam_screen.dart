@@ -32,7 +32,11 @@ class ExamScreen extends StatelessWidget {
         'icon': Icons.list_alt,
         'route': ViewResponsesScreen(examId: exam.id)
       },
-      {'label': 'Item Analysis', 'icon': Icons.analytics, 'route': ItemAnalysisScreen()},
+      {
+        'label': 'Item Analysis',
+        'icon': Icons.analytics,
+        'route': ItemAnalysisScreen(examId: exam.id)
+      },
     ];
 
     return Scaffold(
@@ -63,13 +67,13 @@ class ExamScreen extends StatelessWidget {
                 Row(children: [
                   Text("Responses:",
                       style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text(12.toString())
+                  Text(exam.responses.toString())
                 ]),
                 SizedBox(height: 12),
-                Text(exam.quarter.name,
+                Text(exam.quarterName,
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 Divider(),
-                Text(exam.subject.name,
+                Text(exam.subjectName,
                     style: TextStyle(fontWeight: FontWeight.bold))
               ],
             ),

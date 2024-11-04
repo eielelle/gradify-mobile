@@ -4,7 +4,9 @@ import 'package:scannerv3/widgets/score_dist_widget.dart';
 import 'package:scannerv3/widgets/statistics_widget.dart';
 
 class ItemAnalysisScreen extends StatefulWidget {
-  const ItemAnalysisScreen({super.key});
+  final int examId;
+
+  const ItemAnalysisScreen({super.key, required this.examId});
 
   @override
   State<ItemAnalysisScreen> createState() => _ItemAnalysisScreenState();

@@ -67,13 +67,16 @@ class _SigninScreenState extends State<SigninScreen> {
       if (mounted) {
         // Handle errors from Dio
         setState(() {
-          print("TEST");
-          print(error.response?.data);
-          _errorMessage =
-              error.response?.data['status']['message'] ?? 'Error signing in';
+          if (error.response!.headers['content-type']!
+              .contains("application/json")) {
+            _errorMessage =
+                error.response?.data['status']['message'] ?? 'Error signing in';
+          }
           _loading = false;
         });
 
+        _errorMessage =
+            "Can't log you in. Please check your internet connection.";
         _showErrorDialog(_errorMessage);
       }
     }
@@ -121,6 +124,7 @@ class _SigninScreenState extends State<SigninScreen> {
                           TextStyle(color: Color.fromRGBO(187, 187, 187, 1))),
                   const SizedBox(height: 20),
                   TextField(
+                    style: const TextStyle(color: Colors.white),
                     controller: _emailController,
                     decoration: const InputDecoration(
                         border: OutlineInputBorder(),
@@ -136,6 +140,7 @@ class _SigninScreenState extends State<SigninScreen> {
                   ),
                   const SizedBox(height: 14),
                   TextField(
+                    style: const TextStyle(color: Colors.white),
                     controller: _passwordController,
                     decoration: const InputDecoration(
                         border: OutlineInputBorder(),
