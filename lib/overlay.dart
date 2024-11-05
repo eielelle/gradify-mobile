@@ -30,12 +30,12 @@ class OverlayPainter extends CustomPainter {
       // Bottom-right corner
       Rect.fromLTWH(size.width - squareSize, size.height - squareSize,
           squareSize, squareSize),
-      // Mid-left edge
-      Rect.fromLTWH(
-          0, size.height / 2 - squareSize / 2, squareSize, squareSize),
-      // Mid-right edge
-      Rect.fromLTWH(size.width - squareSize, size.height / 2 - squareSize / 2,
-          squareSize, squareSize),
+      // // Mid-left edge
+      // Rect.fromLTWH(
+      //     0, size.height / 2 - squareSize / 2, squareSize, squareSize),
+      // // Mid-right edge
+      // Rect.fromLTWH(size.width - squareSize, size.height / 2 - squareSize / 2,
+      //     squareSize, squareSize),
     ];
 
     // Draw the transparent squares at each position

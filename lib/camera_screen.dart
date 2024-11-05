@@ -64,7 +64,7 @@ class _CameraScreenState extends State<CameraScreen> {
             builder: (context) {
               return AlertDialog(
                   title: const Text('Image Captured!'),
-                  content: const Text('Image saved and processed for OpenCV'),
+                  content: const Text('Image saved and ready for processing'),
                   actions: <Widget>[
                     TextButton(
                         onPressed: () {

@@ -1,8 +1,18 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:scannerv3/models/offline/response_offline.dart';
 
 class StatisticsWidget extends StatelessWidget {
-  const StatisticsWidget({super.key});
+  final double pass, fail, avg;
+  final int low, high;
+
+  const StatisticsWidget(
+      {super.key,
+      required this.pass,
+      required this.fail,
+      required this.avg,
+      required this.low,
+      required this.high});
 
   List<PieChartSectionData> showingSections() {
     return List.generate(2, (index) {
@@ -10,8 +20,8 @@ class StatisticsWidget extends StatelessWidget {
         case 0:
           return PieChartSectionData(
             color: Colors.green,
-            value: 40,
-            title: '40%',
+            value: pass,
+            title: '$pass%',
             radius: 60,
             titleStyle: const TextStyle(
               fontSize: 20,
@@ -21,8 +31,8 @@ class StatisticsWidget extends StatelessWidget {
         case 1:
           return PieChartSectionData(
             color: Colors.red,
-            value: 60,
-            title: '60%',
+            value: fail,
+            title: '$fail%',
             radius: 60,
             titleStyle: const TextStyle(
               fontSize: 20,
@@ -74,32 +84,32 @@ class StatisticsWidget extends StatelessWidget {
                                 Text("Lowest Score: ",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
-                                Text("1")
+                                Text(low.toString())
                               ]),
                               Row(children: [
                                 Text("Highest Score: ",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
-                                Text("1")
+                                Text(high.toString())
                               ]),
                               Row(children: [
                                 Text("Average: ",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
-                                Text("1")
+                                Text(avg.toString())
                               ]),
-                              Row(children: [
-                                Text("Median: ",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                                Text("1")
-                              ]),
-                              Row(children: [
-                                Text("Std. Deviation: ",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                                Text("1")
-                              ]),
+                              // Row(children: [
+                              //   Text("Median: ",
+                              //       style:
+                              //           TextStyle(fontWeight: FontWeight.bold)),
+                              //   Text("1")
+                              // ]),
+                              // Row(children: [
+                              //   Text("Std. Deviation: ",
+                              //       style:
+                              //           TextStyle(fontWeight: FontWeight.bold)),
+                              //   Text("1")
+                              // ]),
                             ]))))
           ],
         ));

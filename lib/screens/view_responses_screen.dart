@@ -112,6 +112,7 @@ class _ViewResponsesScreenState extends State<ViewResponsesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromRGBO(41, 46, 50, 1),
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
         title: const Text("View Responses"),
@@ -122,12 +123,16 @@ class _ViewResponsesScreenState extends State<ViewResponsesScreen> {
           },
         ),
       ),
-      body: Expanded(
-          child: ListView.builder(
-              itemCount: list.length,
-              itemBuilder: (context, index) {
-                return _buildResponse(list[index]);
-              })),
+      body: Container(
+          padding: EdgeInsets.all(12),
+          child: Expanded(
+              child: _loading
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: list.length,
+                      itemBuilder: (context, index) {
+                        return _buildResponse(list[index]);
+                      }))),
     );
   }
 

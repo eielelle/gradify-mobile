@@ -1,14 +1,8 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:opencv_dart/opencv_dart.dart';
 import 'package:scannerv3/helpers/database_helper.dart';
 import 'package:scannerv3/models/exam.dart';
-import 'package:scannerv3/models/offline/exam_offline.dart';
 import 'package:scannerv3/models/quarter.dart';
-import 'package:scannerv3/models/school_exam.dart';
 import 'package:scannerv3/models/subject.dart';
 import 'package:scannerv3/screens/exam_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';

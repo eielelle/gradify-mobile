@@ -1,13 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AboutFragment extends StatelessWidget {
+class AboutFragment extends StatefulWidget {
   const AboutFragment({super.key});
+
+  @override
+  State<AboutFragment> createState() => _AboutFragmentState();
+}
+
+class _AboutFragmentState extends State<AboutFragment> {
+  String name = "";
+  String email = "";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    setAbout();
+  }
+
+  Future<void> setAbout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      name = prefs.getString('auth_name') ?? "";
+      email = prefs.getString('auth_email') ?? "";
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
         padding: const EdgeInsets.all(12),
-        child: const Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 14),
@@ -26,8 +52,9 @@ class AboutFragment extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 12),
-                    Text("Name: ", style: TextStyle(color: Colors.white)),
-                    Text("Email: ", style: TextStyle(color: Colors.white)),
+                    Text("Name: $name", style: TextStyle(color: Colors.white)),
+                    Text("Email: $email",
+                        style: TextStyle(color: Colors.white)),
                   ],
                 ),
               ),

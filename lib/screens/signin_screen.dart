@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:scannerv3/screens/home_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SigninScreen extends StatefulWidget {
   const SigninScreen({super.key});
@@ -41,6 +42,11 @@ class _SigninScreenState extends State<SigninScreen> {
       if (res.statusCode == 200) {
         final token = res.headers.value('Authorization');
         await TokenManager().saveToken(token);
+
+        // set name and email
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('auth_name', res.data["data"]["name"]);
+        prefs.setString('auth_email', res.data["data"]["email"]);
 
         if (mounted) {
           setState(() {

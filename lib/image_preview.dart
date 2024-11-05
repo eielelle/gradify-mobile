@@ -44,6 +44,8 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
               ),
             ),
             onPressed: () {
+              print("EXAM RESULT:");
+              print(bubbles.result);
               Navigator.push(
                   context,
                   MaterialPageRoute(

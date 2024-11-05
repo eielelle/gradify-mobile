@@ -1,11 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:scannerv3/models/school_year.dart';
-import 'package:scannerv3/models/section.dart';
+import 'package:scannerv3/helpers/database_helper.dart';
 import 'package:scannerv3/models/student.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
+import 'package:sqflite/sqflite.dart';
 
 class StudentScreen extends StatefulWidget {
   final int sectionId;
@@ -17,15 +16,41 @@ class StudentScreen extends StatefulWidget {
 }
 
 class _StudentScreenState extends State<StudentScreen> {
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
+  Future<List<Student>> fetchStudentsLocal() async {
+    try {
+      final db = await DatabaseHelper().database;
+
+      // Query the table for all the exams.
+      final List<Map<String, dynamic>> maps = await db.query('students');
+
+      return List.generate(maps.length, (i) {
+        return Student.fromMap(maps[i]);
+      });
+    } catch (error) {
+      return Future.error("Database fallback failed.");
+    }
+  }
+
+  Future<List<Student>> fetchStudentsWithFallback() async {
+    List<Student> exams = [];
+
+    try {
+      exams = await fetchStudents();
+    } on DioException {
+      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      return fetchStudentsLocal();
+    } catch (error) {
+      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      return fetchStudentsLocal();
+    }
+
+    return exams;
   }
 
   Future<List<Student>> fetchStudents() async {
     final List<Student> list = [];
     final dio = Dio();
+    final db = await DatabaseHelper().database;
     final token = await TokenManager().getAuthToken();
     final res = await dio.get(ApiEndpoints.students,
         data: {"section_id": widget.sectionId},
@@ -36,15 +61,46 @@ class _StudentScreenState extends State<StudentScreen> {
 
       for (var student in students) {
         final attr = student["attributes"];
-        final stud = Student(attr["name"], attr["student_number"]);
+        final stud =
+            Student(name: attr["name"], student_number: attr["student_number"]);
 
         list.add(stud);
       }
 
-      return list;
+      await db.transaction((txn) async {
+        // Clear the table
+        await txn.delete('students'); // This will remove all rows
+        // Insert new data
+        for (var data in list) {
+          await txn.insert('students', data.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+      });
     } else {
-      throw Exception('Failed to load posts');
+      return Future.error("Something went wrong");
     }
+
+    return list;
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Fetch Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -64,7 +120,7 @@ class _StudentScreenState extends State<StudentScreen> {
             padding: EdgeInsets.all(12),
             child: Expanded(
                 child: FutureBuilder<List<Student>>(
-                    future: fetchStudents(),
+                    future: fetchStudentsWithFallback(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());

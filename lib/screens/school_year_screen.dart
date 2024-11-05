@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:scannerv3/helpers/database_helper.dart';
 import 'package:scannerv3/models/school_year.dart';
 import 'package:scannerv3/screens/sections_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
+import 'package:sqflite/sqflite.dart';
 
 class SchoolYearScreen extends StatefulWidget {
   final int classId;
@@ -16,35 +18,95 @@ class SchoolYearScreen extends StatefulWidget {
 }
 
 class _SchoolYearScreenState extends State<SchoolYearScreen> {
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
+  Future<List<SchoolYear>> fetchSYWithFallback() async {
+    List<SchoolYear> years = [];
+
+    try {
+      years = await fetchSY();
+    } on DioException {
+      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      return fetchSYLocal();
+    } catch (error) {
+      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      return fetchSYLocal();
+    }
+
+    return years;
+  }
+
+  Future<List<SchoolYear>> fetchSYLocal() async {
+    try {
+      final db = await DatabaseHelper().database;
+
+      // Query the table for all the exams.
+      final List<Map<String, dynamic>> maps = await db.query('sy');
+
+      return List.generate(maps.length, (i) {
+        return SchoolYear.fromMap(maps[i]);
+      });
+    } catch (error) {
+      return Future.error("Database fallback failed.");
+    }
   }
 
   Future<List<SchoolYear>> fetchSY() async {
     final List<SchoolYear> list = [];
     final dio = Dio();
     final token = await TokenManager().getAuthToken();
+
     final res = await dio.get(ApiEndpoints.sy,
         data: {"class_id": widget.classId},
         options: Options(headers: {'Authorization': token}));
 
     if (res.statusCode == 200) {
       final years = res.data["years"] ?? [];
+      final db = await DatabaseHelper().database;
 
       for (var year in years) {
         final attr = year["attributes"];
-        final sc = SchoolYear(attr["name"], DateTime.parse(attr["start"]),
-            DateTime.parse(attr["end"]), attr["id"]);
+        final sc = SchoolYear(
+            name: attr["name"],
+            startDate: attr["start"],
+            endDate: attr["end"],
+            id: attr["id"]);
 
         list.add(sc);
       }
 
-      return list;
+      await db.transaction((txn) async {
+        // Clear the table
+        await txn.delete('sy'); // This will remove all rows
+        // Insert new data
+        for (var data in list) {
+          await txn.insert('sy', data.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+      });
     } else {
-      throw Exception('Failed to load posts');
+      return Future.error("Something went wrong");
     }
+
+    return list;
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Fetch Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -64,7 +126,7 @@ class _SchoolYearScreenState extends State<SchoolYearScreen> {
           padding: EdgeInsets.all(12),
           child: Expanded(
               child: FutureBuilder<List<SchoolYear>>(
-                  future: fetchSY(),
+                  future: fetchSYWithFallback(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
@@ -97,7 +159,7 @@ class _SchoolYearScreenState extends State<SchoolYearScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           subtitle: Text(
-              "${DateFormat('MMMM d, y').format(sy.startDate)} - ${DateFormat('MMMM d, y').format(sy.endDate)}")),
+              "${DateFormat('MMMM d, y').format(DateTime.parse(sy.startDate))} - ${DateFormat('MMMM d, y').format(DateTime.parse(sy.endDate))}")),
     );
   }
 }

@@ -50,13 +50,37 @@ class DatabaseHelper {
         description TEXT
       )''',
     );
+
+    await db.execute(
+      '''CREATE TABLE sy(
+        id INTEGER PRIMARY KEY,
+        name TEXT,
+        startDate TEXT,
+        endDate TEXT
+      )''',
+    );
+
+    await db.execute(
+      '''CREATE TABLE sections(
+        id INTEGER PRIMARY KEY,
+        name TEXT
+      )''',
+    );
+
+    await db.execute(
+      '''CREATE TABLE students(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        student_number TEXT,
+        name TEXT
+      )''',
+    );
   }
 
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'database.db');
     return await openDatabase(
       path,
-      version: 18,
+      version: 27,
       onCreate: (db, version) async {
         await _createTables(db);
       },
@@ -65,6 +89,9 @@ class DatabaseHelper {
         await db.execute('DROP TABLE IF EXISTS responses');
         await db.execute('DROP TABLE IF EXISTS exams');
         await db.execute('DROP TABLE IF EXISTS classes');
+        await db.execute('DROP TABLE IF EXISTS sy');
+        await db.execute('DROP TABLE IF EXISTS sections');
+        await db.execute('DROP TABLE IF EXISTS students');
         await _createTables(db);
       },
     );
