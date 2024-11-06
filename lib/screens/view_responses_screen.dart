@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:scannerv3/helpers/database_helper.dart';
+import 'package:scannerv3/helpers/toast_helper.dart';
 import 'package:scannerv3/models/offline/response_offline.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
@@ -85,28 +86,8 @@ class _ViewResponsesScreenState extends State<ViewResponsesScreen> {
         _loading = false;
       });
 
-      _showDialog("Fetch error", _errorMessage);
+      ToastHelper.showToast("You are offline. Local data has been loaded.");
     }
-  }
-
-  void _showDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override

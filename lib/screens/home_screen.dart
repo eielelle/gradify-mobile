@@ -7,7 +7,6 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:scannerv3/fragments/about_fragment.dart';
 import 'package:scannerv3/fragments/classes_fragment.dart';
 import 'package:scannerv3/fragments/exams_fragment.dart';
-import 'package:scannerv3/fragments/grade_fragment.dart';
 import 'package:scannerv3/helpers/dialog_helper.dart';
 import 'package:scannerv3/screens/welcome_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';

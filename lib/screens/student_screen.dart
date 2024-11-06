@@ -1,7 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:scannerv3/helpers/database_helper.dart';
+import 'package:scannerv3/helpers/toast_helper.dart';
 import 'package:scannerv3/models/student.dart';
+import 'package:scannerv3/screens/home_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
 import 'package:sqflite/sqflite.dart';
@@ -37,10 +40,10 @@ class _StudentScreenState extends State<StudentScreen> {
     try {
       exams = await fetchStudents();
     } on DioException {
-      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      ToastHelper.showToast("You are offline. Local data has been loaded.");
       return fetchStudentsLocal();
     } catch (error) {
-      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      ToastHelper.showToast("You are offline. Local data has been loaded.");
       return fetchStudentsLocal();
     }
 
@@ -83,39 +86,34 @@ class _StudentScreenState extends State<StudentScreen> {
     return list;
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Fetch Error'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: const Color.fromRGBO(41, 46, 50, 1),
         appBar: AppBar(
-            backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
-            title: const Text("Student List"),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
+          backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
+          title: const Text("Student List"),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Iconsax.home,
+                color: Colors.white,
+              ),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    (route) => false);
               },
-            )),
+            )
+          ],
+        ),
         body: Container(
             padding: EdgeInsets.all(12),
             child: Expanded(
@@ -126,7 +124,19 @@ class _StudentScreenState extends State<StudentScreen> {
                         return Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
                         // if error has seen
-                        print(snapshot.error);
+                        return const Center(
+                            child: Text("Something went wrong.",
+                                style: TextStyle(color: Colors.white)));
+                      }
+
+                      if (snapshot.data!.isEmpty) {
+                        return Center(
+                            child: Column(children: [
+                          Image.asset('assets/images/empty.gif',
+                              width: 300, height: 300),
+                          const Text("No classes assigned yet.",
+                              style: TextStyle(color: Colors.white))
+                        ]));
                       }
 
                       return ListView.builder(

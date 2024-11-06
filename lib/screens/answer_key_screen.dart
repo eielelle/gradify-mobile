@@ -8,6 +8,7 @@ class AnswerKeyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromRGBO(41, 46, 50, 1),
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
         title: const Text("Answer Key"),
@@ -30,7 +31,9 @@ class AnswerKeyScreen extends StatelessWidget {
                           children: [
                             Text("${index + 1}: ",
                                 style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 24)),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                    color: Colors.white)),
                             _buildBubble("A",
                                 isKey: answerKey[index].contains("A")),
                             _buildBubble("B",

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:scannerv3/helpers/database_helper.dart';
+import 'package:scannerv3/helpers/toast_helper.dart';
 import 'package:scannerv3/models/school_class.dart';
 import 'package:scannerv3/screens/school_year_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
@@ -27,10 +28,10 @@ class _ClassesFragmentState extends State<ClassesFragment> {
     try {
       classes = await fetchClasses();
     } on DioException {
-      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      ToastHelper.showToast("You are offline. Local data has been loaded.");
       return fetchClassesLocal();
     } catch (error) {
-      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      ToastHelper.showToast("You are offline. Local data has been loaded.");
       return fetchClassesLocal();
     }
 
@@ -90,26 +91,6 @@ class _ClassesFragmentState extends State<ClassesFragment> {
     return list;
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Fetch Error"),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -129,12 +110,20 @@ class _ClassesFragmentState extends State<ClassesFragment> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
                     if (snapshot.hasError) {
-                      if (snapshot.error is DioException) {
-                        return const Center(child: Text("DioException Error"));
-                      } else {
-                        return Center(child: Text(snapshot.error.toString()));
-                      }
+                      return const Center(
+                          child: Text("Something went wrong.",
+                              style: TextStyle(color: Colors.white)));
                     } else if (snapshot.hasData) {
+                      if (snapshot.data!.isEmpty) {
+                        return Center(
+                            child: Column(children: [
+                          Image.asset('assets/images/empty.gif',
+                              width: 300, height: 300),
+                          const Text("No classes assigned yet.",
+                              style: TextStyle(color: Colors.white))
+                        ]));
+                      }
+
                       return ListView.builder(
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
@@ -162,7 +151,10 @@ class _ClassesFragmentState extends State<ClassesFragment> {
                           classId: sc.id,
                         )));
           },
-          title: Text(sc.name),
+          title: Text(
+            sc.name,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
           subtitle: Text(
               sc.description.isEmpty ? "No description yet" : sc.description)),
     );

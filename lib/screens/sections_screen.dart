@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:scannerv3/helpers/database_helper.dart';
+import 'package:scannerv3/helpers/toast_helper.dart';
 import 'package:scannerv3/models/section.dart';
 import 'package:scannerv3/screens/student_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
@@ -39,10 +40,10 @@ class _SectionsScreenState extends State<SectionsScreen> {
     try {
       sections = await fetchSection();
     } on DioException {
-      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      ToastHelper.showToast("You are offline. Local data has been loaded.");
       return fetchSectionLocal();
     } catch (error) {
-      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      ToastHelper.showToast("You are offline. Local data has been loaded.");
       return fetchSectionLocal();
     }
 
@@ -84,26 +85,6 @@ class _SectionsScreenState extends State<SectionsScreen> {
     return list;
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Fetch Error'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,9 +107,20 @@ class _SectionsScreenState extends State<SectionsScreen> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      // if error has seen
-                      print(snapshot.error);
+                      return const Center(
+                          child: Text("Something went wrong.",
+                              style: TextStyle(color: Colors.white)));
                     }
+
+                      if (snapshot.data!.isEmpty) {
+                        return Center(
+                            child: Column(children: [
+                          Image.asset('assets/images/empty.gif',
+                              width: 300, height: 300),
+                          const Text("No sections assigned yet.",
+                              style: TextStyle(color: Colors.white))
+                        ]));
+                      }
 
                     return ListView.builder(
                         itemCount: snapshot.data!.length,
@@ -149,6 +141,7 @@ class _SectionsScreenState extends State<SectionsScreen> {
                       builder: (context) =>
                           StudentScreen(sectionId: section.id)));
             },
-            title: Text(section.name)));
+            title: Text(section.name,
+                style: const TextStyle(fontWeight: FontWeight.bold))));
   }
 }

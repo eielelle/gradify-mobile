@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:scannerv3/helpers/database_helper.dart';
+import 'package:scannerv3/helpers/toast_helper.dart';
 import 'package:scannerv3/models/school_year.dart';
 import 'package:scannerv3/screens/sections_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
@@ -24,10 +25,10 @@ class _SchoolYearScreenState extends State<SchoolYearScreen> {
     try {
       years = await fetchSY();
     } on DioException {
-      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      ToastHelper.showToast("You are offline. Local data has been loaded.");
       return fetchSYLocal();
     } catch (error) {
-      _showErrorDialog("Cannot sync to web. Loading local data instead.");
+      ToastHelper.showToast("You are offline. Local data has been loaded.");
       return fetchSYLocal();
     }
 
@@ -89,26 +90,6 @@ class _SchoolYearScreenState extends State<SchoolYearScreen> {
     return list;
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Fetch Error'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,11 +110,24 @@ class _SchoolYearScreenState extends State<SchoolYearScreen> {
                   future: fetchSYWithFallback(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      // if error has seen
-                      print(snapshot.error);
+                      return const Center(
+                          child: Text("Something went wrong.",
+                              style: TextStyle(color: Colors.white)));
                     }
+
+                      if (snapshot.data!.isEmpty) {
+                        return Center(
+                            child: Column(children: [
+                          Image.asset('assets/images/empty.gif',
+                              width: 300, height: 300),
+                          const Text("No school year assigned.",
+                              style: TextStyle(color: Colors.white))
+                        ]));
+                      }
+
+                    
 
                     return ListView.builder(
                         itemCount: snapshot.data!.length,
