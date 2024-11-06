@@ -104,7 +104,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       final data = {
         "exam_id": widget.exam.id,
         "student_number": widget.studentId,
-        "answer": widget.answer,
+        "answer": widget.answer.join(),
         "score": widget.score,
         "detected": widget.detected,
         "image_path": ""
