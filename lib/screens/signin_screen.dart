@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:scannerv3/helpers/dialog_helper.dart';
+import 'package:scannerv3/helpers/loader_helper.dart';
 import 'package:scannerv3/screens/home_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
@@ -27,6 +30,7 @@ class _SigninScreenState extends State<SigninScreen> {
   }
 
   Future<void> signin() async {
+    _dio.options.connectTimeout = const Duration(seconds: 30);
     final email = _emailController.text;
     final password = _passwordController.text;
 
@@ -66,46 +70,37 @@ class _SigninScreenState extends State<SigninScreen> {
             _loading = false;
           });
 
-          _showErrorDialog(_errorMessage);
+          DialogHelper.showCustomDialog(
+              title: "Authentication Failed",
+              subtitle: _errorMessage,
+              context: context);
         }
       }
     } on DioException catch (error) {
       if (mounted) {
         // Handle errors from Dio
-        setState(() {
-          if (error.response!.headers['content-type']!
-              .contains("application/json")) {
+        if (error.response == null) {
+          setState(() {
             _errorMessage =
-                error.response?.data['status']['message'] ?? 'Error signing in';
-          }
-          _loading = false;
-        });
+                "Can't log you in. Please check your internet connection.";
+            _loading = false;
+          });
+        } else {
+          setState(() {
+            if (error.response != null) {
+              _errorMessage = error.response?.data['status']['message'] ??
+                  'Error signing in';
+            }
+            _loading = false;
+          });
+        }
 
-        _errorMessage =
-            "Can't log you in. Please check your internet connection.";
-        _showErrorDialog(_errorMessage);
+        DialogHelper.showCustomDialog(
+            title: "Authentication Failed",
+            subtitle: _errorMessage,
+            context: context);
       }
     }
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Authentication Error'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -163,11 +158,13 @@ class _SigninScreenState extends State<SigninScreen> {
                   ),
                   const SizedBox(height: 14),
                   SizedBox(
+                      width: double.infinity,
                       child: ElevatedButton(
                           onPressed: () {
                             signin();
                           },
                           style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             backgroundColor:
                                 const Color.fromRGBO(101, 188, 80, 1),
                             shape: RoundedRectangleBorder(
@@ -176,7 +173,7 @@ class _SigninScreenState extends State<SigninScreen> {
                             ),
                           ),
                           child: _loading
-                              ? CircularProgressIndicator()
+                              ? LoaderHelper.showLoading()
                               : const Text(
                                   "SIGN IN",
                                   style: TextStyle(color: Colors.white),
