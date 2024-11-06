@@ -8,6 +8,7 @@ import 'package:scannerv3/fragments/about_fragment.dart';
 import 'package:scannerv3/fragments/classes_fragment.dart';
 import 'package:scannerv3/fragments/exams_fragment.dart';
 import 'package:scannerv3/fragments/grade_fragment.dart';
+import 'package:scannerv3/helpers/dialog_helper.dart';
 import 'package:scannerv3/screens/welcome_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 
@@ -25,18 +26,32 @@ class _HomeScreenState extends State<HomeScreen> {
     const ClassesFragment(),
     const AboutFragment()
   ];
+  bool _isOffline = false;
   late StreamSubscription<List<ConnectivityResult>> subscription;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> result) {
       // Received changes in available connectivity types!
       if (result.contains(ConnectivityResult.none)) {
-        _showOfflineDialog();
-      }
+        DialogHelper.showCustomDialog(
+            title: "You are Offline",
+            subtitle:
+                "Your changes are saved locally and will be synced as soon as you're back online.",
+            context: context);
 
+        setState(() {
+          _isOffline = true;
+        });
+      } else {
+        setState(() {
+          _isOffline = false;
+        });
+      }
     });
   }
 
@@ -45,27 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement dispose
     subscription.cancel();
     super.dispose();
-
-  }
-
-  void _showOfflineDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('No Internet Connection'),
-          content: Text('You are currently offline. Only local changes can be seen.'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void onTappedBar(int index) {
@@ -111,7 +105,31 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Color.fromRGBO(101, 188, 80, 1))))
         ],
       ),
-      body: _children[_currentIndex],
+      body: Column(children: [
+        if (_isOffline)
+          Container(
+            color: Colors.red,
+            alignment: Alignment.center,
+            width: double.infinity,
+            padding: const EdgeInsets.all(6),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.signal_wifi_off_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  "You are currently offline",
+                  style: TextStyle(color: Colors.white),
+                )
+              ],
+            ),
+          ),
+        Expanded(child: _children[_currentIndex])
+      ]),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: const Color.fromRGBO(101, 188, 80, 1),

@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:scannerv3/helpers/database_helper.dart';
 import 'package:scannerv3/models/school_class.dart';
 import 'package:scannerv3/screens/school_year_screen.dart';
