@@ -1,7 +1,6 @@
 class ResponseOffline {
-  final int id;
+  final int? id;
   final int examId;
-  final int userId;
   final String studentNumber;
   final String imagePath;
   final int detected;
@@ -12,13 +11,12 @@ class ResponseOffline {
   final String name;
   final String email;
 
-  ResponseOffline(this.id, this.examId, this.userId, this.studentNumber, this.imagePath, this.detected, this.score, this.answer, this.createdAt, { this.name = "", this.email = "" });
+  ResponseOffline({this.id, required this.examId, required this.studentNumber, required this.imagePath, required this.detected, required this.score, required this.answer, required this.createdAt, this.name = "", this.email = ""});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'examId': examId,
-      'userId': userId,
       'studentNumber': studentNumber,
       'imagePath': imagePath,
       'detected': detected,
@@ -30,15 +28,14 @@ class ResponseOffline {
 
   static ResponseOffline fromMap(Map<String, dynamic> map) {
     return ResponseOffline(
-      map['id'],
-      map['examId'],
-      map['userId'],
-      map['studentNumber'],
-      map['imagePath'],
-      map['detected'],
-      map['score'],
-      map['answer'],
-      DateTime.parse(map['createdAt']),
+      id: map['id'],
+      examId: map['examId'],
+      studentNumber: map['studentNumber'],
+      imagePath: map['imagePath'],
+      detected: map['detected'],
+      score: map['score'],
+      answer: map['answer'],
+      createdAt: DateTime.parse(map['createdAt']),
     );
   }
 

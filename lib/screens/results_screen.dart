@@ -4,12 +4,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:scannerv3/helpers/database_helper.dart';
+import 'package:scannerv3/helpers/dialog_helper.dart';
+import 'package:scannerv3/helpers/loader_helper.dart';
 import 'package:scannerv3/models/exam.dart';
 import 'package:scannerv3/models/offline/response_offline.dart';
 import 'package:scannerv3/screens/edit_response_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
-import 'package:scannerv3/widgets/results_options_widget.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ResultsScreen extends StatefulWidget {
@@ -34,7 +35,6 @@ class ResultsScreen extends StatefulWidget {
 
 class _ResultsScreenState extends State<ResultsScreen> {
   bool _isSaving = false;
-  String _errorMessage = "";
   final Dio _dio = Dio();
 
   @override
@@ -74,82 +74,25 @@ class _ResultsScreenState extends State<ResultsScreen> {
     });
   }
 
-  void _showDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  Future<void> saveResponseWithFallback() async {
+    final Map<String, dynamic> data = {
+      "exam_id": widget.exam.id,
+      "student_number": widget.studentId,
+      "answer": widget.answer.join(),
+      "score": widget.score,
+      "detected": widget.detected,
+      "image_path": "",
+      "created_at": DateTime.now().toString()
+    };
 
-  Future<void> saveResponse() async {
+    bool savedInlocal = await saveLocal(data);
+
     setState(() {
       _isSaving = true;
     });
 
-    try {
-      final token = await TokenManager().getAuthToken();
-      final data = {
-        "exam_id": widget.exam.id,
-        "student_number": widget.studentId,
-        "answer": widget.answer.join(),
-        "score": widget.score,
-        "detected": widget.detected,
-        "image_path": ""
-      };
-
-      if (token != null) {
-        print("hey");
-        print(widget.studentId);
-        final res = await _dio.post(ApiEndpoints.responses,
-            data: data, options: Options(headers: {'Authorization': token}));
-
-        if (res.statusCode == 200) {
-          final response = res.data;
-
-          print(response);
-
-          // save to db
-          ResponseOffline responseOffline = ResponseOffline(
-              response["id"],
-              response["exam_id"],
-              response["user_id"],
-              response["student_number"],
-              response["image_path"],
-              response["detected"],
-              response["score"],
-              response["answer"],
-              DateTime.parse(response["created_at"]));
-
-          // insert to db for offline access
-          final db = await DatabaseHelper().database;
-          db.insert('responses', responseOffline.toMap(),
-              conflictAlgorithm: ConflictAlgorithm.replace);
-
-          _showDialog("Response Saved", "Response is saved");
-        } else {
-          _errorMessage = 'Error saving response';
-        }
-      }
-    } on DioException catch (error) {
-      setState(() {
-        _errorMessage =
-            error.response?.data['errors'][0] ?? 'Error fetching data';
-      });
-
-      _showDialog("Save Error", _errorMessage);
+    if (savedInlocal) {
+      await saveResponse(data);
     }
 
     setState(() {
@@ -157,12 +100,89 @@ class _ResultsScreenState extends State<ResultsScreen> {
     });
   }
 
+  Future<bool> saveLocal(Map<String, dynamic> data) async {
+    try {
+      // save to db
+      ResponseOffline responseOffline = ResponseOffline(
+          examId: data["exam_id"],
+          studentNumber: data["student_number"],
+          imagePath: data["image_path"],
+          detected: data["detected"],
+          score: data["score"],
+          answer: data["answer"],
+          createdAt: DateTime.parse(data["created_at"]));
+
+      // insert to db for offline access
+      final db = await DatabaseHelper().database;
+      final ok = await db.insert('responses', responseOffline.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+
+      return ok != 0;
+    } catch (error) {
+      if (mounted) {
+        DialogHelper.showCustomDialog(
+            title: "Database Error",
+            subtitle: "Cannot save response offline",
+            context: context);
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> saveResponse(Map<String, dynamic> data) async {
+    try {
+      final token = await TokenManager().getAuthToken();
+
+      if (token != null) {
+        final res = await _dio.post(ApiEndpoints.responses,
+            data: data, options: Options(headers: {'Authorization': token}));
+
+        if (res.statusCode == 200) {
+          if (mounted) {
+            DialogHelper.showCustomDialog(
+                title: "Response is saved",
+                subtitle: "Response is saved and synced to web.",
+                context: context);
+          }
+        } else {
+          if (mounted) {
+            DialogHelper.showCustomDialog(
+                title: "Response not saved",
+                subtitle: "Something went wrong.",
+                context: context);
+          }
+        }
+      }
+    } on DioException catch (error) {
+      String msg = "Something went wrong";
+
+      if (error.response != null) {
+        msg = error.response?.data["errors"][0];
+
+        if (mounted) {
+          DialogHelper.showCustomDialog(
+              title: "Saved Response Offline",
+              subtitle: "Failed to sync response online. $msg",
+              context: context);
+        }
+      } else {
+        if (mounted) {
+          DialogHelper.showCustomDialog(
+              title: "Saved Response Offline",
+              subtitle: "Response is only saved locally.",
+              context: context);
+        }
+      }
+    }
+  }
+
   void _editStudId(BuildContext context) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Edit Student ID"),
+            title: const Text("Edit Student ID"),
             content: TextField(
               controller: widget._controller,
               keyboardType: TextInputType.number,
@@ -226,7 +246,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
               }
 
               if (value == "Save Response") {
-                saveResponse();
+                saveResponseWithFallback();
               }
             },
             itemBuilder: (BuildContext context) {
@@ -242,83 +262,95 @@ class _ResultsScreenState extends State<ResultsScreen> {
           )
         ],
       ),
-      body: Column(
-        children: [
-          Container(
-            color: const Color.fromRGBO(101, 188, 80, 1),
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: _isSaving
+          ? Center(child: LoaderHelper.showLoading())
+          : Column(
               children: [
-                Row(children: [
-                  const Text("Exam Name:",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text(widget.exam.name)
-                ]),
-                Row(children: [
-                  const Text("Responses:",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text(12.toString())
-                ]),
-                const SizedBox(height: 12),
-                Text(widget.exam.quarterName,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                const Divider(),
-                Text(widget.exam.subjectName,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    const Text("Student ID: ",
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text(widget.studentId),
-                    IconButton(
-                        onPressed: () {
-                          _editStudId(context);
-                        },
-                        icon: Icon(Iconsax.edit))
-                  ],
+                Container(
+                  color: const Color.fromRGBO(101, 188, 80, 1),
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        const Text("Exam Name:",
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(widget.exam.name)
+                      ]),
+                      Row(children: [
+                        const Text("Responses:",
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(widget.exam.responses.toString())
+                      ]),
+                      const SizedBox(height: 12),
+                      Text(widget.exam.quarterName,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const Divider(),
+                      Text(widget.exam.subjectName,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          const Text("Student ID: ",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text(widget.studentId),
+                          IconButton(
+                              onPressed: () {
+                                _editStudId(context);
+                              },
+                              icon: Icon(Iconsax.edit))
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Text("Detected Bubbles: ",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text("${widget.detected}/50"),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Text("Score: ",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text("${widget.score}/50"),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
-                Row(
-                  children: [
-                    const Text("Detected Bubbles: ",
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text("${widget.detected}/50"),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Text("Score: ",
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text("${widget.score}/50"),
-                  ],
-                )
+                Expanded(
+                    child: ListView.builder(
+                        itemCount: widget.answer.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                              padding: EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text("${index + 1}: ",
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 24,
+                                              color: Colors.white)),
+                                      _buildBubble("A", index),
+                                      _buildBubble("B", index),
+                                      _buildBubble("C", index),
+                                      _buildBubble("D", index),
+                                      _buildBubble("E", index),
+                                    ],
+                                  ),
+                                  SizedBox(height: 12),
+                                  Text(
+                                    "Correct Answer: ${widget.answerKey[index]}",
+                                    style: TextStyle(color: Colors.white),
+                                  )
+                                ],
+                              ));
+                        }))
               ],
             ),
-          ),
-          Expanded(
-              child: ListView.builder(
-                  itemCount: widget.answer.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Row(
-                          children: [
-                            Text("${index + 1}: ",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 24,
-                                    color: Colors.white)),
-                            _buildBubble("A", index),
-                            _buildBubble("B", index),
-                            _buildBubble("C", index),
-                            _buildBubble("D", index),
-                            _buildBubble("E", index),
-                          ],
-                        ));
-                  }))
-        ],
-      ),
     );
   }
 

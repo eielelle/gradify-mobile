@@ -8,4 +8,18 @@ class LoaderHelper {
       child: CircularProgressIndicator(color: Colors.white),
     );
   }
+
+  static void showDialogLoading(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent closing the dialog
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(
+            color: Colors.green,
+          ),
+        );
+      },
+    );
+  }
 }

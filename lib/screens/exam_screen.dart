@@ -30,7 +30,7 @@ class ExamScreen extends StatelessWidget {
       {
         'label': 'View Responses',
         'icon': Icons.list_alt,
-        'route': ViewResponsesScreen(examId: exam.id)
+        // 'route': ViewResponsesScreen(examId: exam.id)
       },
       {
         'label': 'Item Analysis',
