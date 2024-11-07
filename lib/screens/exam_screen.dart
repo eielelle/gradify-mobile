@@ -30,7 +30,7 @@ class ExamScreen extends StatelessWidget {
       {
         'label': 'View Responses',
         'icon': Icons.list_alt,
-        // 'route': ViewResponsesScreen(examId: exam.id)
+        'route': ViewResponsesScreen(examId: exam.id, exam: exam)
       },
       {
         'label': 'Item Analysis',
@@ -60,12 +60,12 @@ class ExamScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(children: [
-                  Text("Exam Name:",
+                  Text("Exam Name: ",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   Text(exam.name)
                 ]),
                 Row(children: [
-                  Text("Responses:",
+                  Text("Responses: ",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   Text(exam.responses.toString())
                 ]),

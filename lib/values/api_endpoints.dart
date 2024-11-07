@@ -10,4 +10,5 @@ class ApiEndpoints {
   static const String sy = "${baseUrl}teacher/class/years";
   static const String sections = "${baseUrl}teacher/class/year/sections";
   static const String students = "${baseUrl}teacher/section/students";
+  static const String syncResponse = "${baseUrl}teacher/responses/sync";
 }

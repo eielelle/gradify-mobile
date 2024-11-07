@@ -8,7 +8,7 @@ import 'package:scannerv3/fragments/about_fragment.dart';
 import 'package:scannerv3/fragments/classes_fragment.dart';
 import 'package:scannerv3/fragments/exams_fragment.dart';
 import 'package:scannerv3/helpers/dialog_helper.dart';
-import 'package:scannerv3/screens/welcome_screen.dart';
+import 'package:scannerv3/screens/signin_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const WelcomeScreen()),
+                                builder: (context) => const SigninScreen()),
                             (route) => false);
                       }
                     } else {

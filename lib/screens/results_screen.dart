@@ -3,31 +3,35 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:scannerv3/camera_screen.dart';
 import 'package:scannerv3/helpers/database_helper.dart';
 import 'package:scannerv3/helpers/dialog_helper.dart';
 import 'package:scannerv3/helpers/loader_helper.dart';
 import 'package:scannerv3/models/exam.dart';
 import 'package:scannerv3/models/offline/response_offline.dart';
 import 'package:scannerv3/screens/edit_response_screen.dart';
+import 'package:scannerv3/screens/home_screen.dart';
 import 'package:scannerv3/utils/token_manager.dart';
 import 'package:scannerv3/values/api_endpoints.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ResultsScreen extends StatefulWidget {
-  final List<String> answer;
+  List<String> answer;
   final List<String> answerKey;
   final Exam exam;
   final TextEditingController _controller = TextEditingController();
   String studentId;
   int score = 0;
   int detected = 0;
+  final ResponseOffline? existingResponse;
 
   ResultsScreen(
       {super.key,
       required this.answer,
       required this.studentId,
       required this.exam,
-      required this.answerKey});
+      required this.answerKey,
+      this.existingResponse});
 
   @override
   State<ResultsScreen> createState() => _ResultsScreenState();
@@ -85,14 +89,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
       "created_at": DateTime.now().toString()
     };
 
-    bool savedInlocal = await saveLocal(data);
-
     setState(() {
       _isSaving = true;
     });
 
-    if (savedInlocal) {
-      await saveResponse(data);
+    bool savedWeb = await saveResponse(data);
+
+    if (!savedWeb) {
+      await saveLocal(data);
     }
 
     setState(() {
@@ -104,6 +108,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
     try {
       // save to db
       ResponseOffline responseOffline = ResponseOffline(
+          name: widget.existingResponse?.name ?? "Unknown Student",
+          email: widget.existingResponse?.email ?? "No email provided",
           examId: data["exam_id"],
           studentNumber: data["student_number"],
           imagePath: data["image_path"],
@@ -130,7 +136,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return false;
   }
 
-  Future<void> saveResponse(Map<String, dynamic> data) async {
+  Future<bool> saveResponse(Map<String, dynamic> data) async {
     try {
       final token = await TokenManager().getAuthToken();
 
@@ -145,6 +151,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 subtitle: "Response is saved and synced to web.",
                 context: context);
           }
+
+          return true;
         } else {
           if (mounted) {
             DialogHelper.showCustomDialog(
@@ -175,6 +183,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
         }
       }
     }
+
+    return false;
   }
 
   void _editStudId(BuildContext context) {
@@ -220,12 +230,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
         title: const Text("Answer Key"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -236,11 +240,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         builder: (context) => EditResponseScreen(
                             answer: widget.answer,
                             answerKey: widget.answerKey,
-                            updateAnswer: (String a, int b) => {
+                            updateAnswer: (List<String> a) => {
                                   setState(() {
-                                    widget.answer[b] = a;
+                                    widget.answer = a;
                                   }),
-                                  setDetected(),
                                   setScore()
                                 })));
               }
@@ -248,9 +251,24 @@ class _ResultsScreenState extends State<ResultsScreen> {
               if (value == "Save Response") {
                 saveResponseWithFallback();
               }
+
+              if (value == "Rescan") {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CameraScreen(exam: widget.exam)),
+                    (route) => false);
+              }
+
+              if (value == 'Close') {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    (route) => false);
+              }
             },
             itemBuilder: (BuildContext context) {
-              return {'Edit Response', 'Save Response', 'Discard and Rescan'}
+              return {'Edit Response', 'Save Response', 'Rescan', 'Close'}
                   .map((String choice) {
                 return PopupMenuItem<String>(
                   value: choice,
@@ -273,14 +291,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(children: [
-                        const Text("Exam Name:",
+                        const Text("Exam Name: ",
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         Text(widget.exam.name)
-                      ]),
-                      Row(children: [
-                        const Text("Responses:",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text(widget.exam.responses.toString())
                       ]),
                       const SizedBox(height: 12),
                       Text(widget.exam.quarterName,

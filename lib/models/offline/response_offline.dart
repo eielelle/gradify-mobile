@@ -11,7 +11,17 @@ class ResponseOffline {
   final String name;
   final String email;
 
-  ResponseOffline({this.id, required this.examId, required this.studentNumber, required this.imagePath, required this.detected, required this.score, required this.answer, required this.createdAt, this.name = "", this.email = ""});
+  ResponseOffline(
+      {this.id,
+      required this.examId,
+      required this.studentNumber,
+      required this.imagePath,
+      required this.detected,
+      required this.score,
+      required this.answer,
+      required this.createdAt,
+      this.name = "Unknown Student",
+      this.email = "No provided email"});
 
   Map<String, dynamic> toMap() {
     return {
@@ -23,20 +33,22 @@ class ResponseOffline {
       'score': score,
       'answer': answer,
       'createdAt': createdAt.toIso8601String(),
+      'name': name,
+      'email': email
     };
   }
 
   static ResponseOffline fromMap(Map<String, dynamic> map) {
     return ResponseOffline(
-      id: map['id'],
-      examId: map['examId'],
-      studentNumber: map['studentNumber'],
-      imagePath: map['imagePath'],
-      detected: map['detected'],
-      score: map['score'],
-      answer: map['answer'],
-      createdAt: DateTime.parse(map['createdAt']),
-    );
+        id: map['id'],
+        examId: map['examId'],
+        studentNumber: map['studentNumber'],
+        imagePath: map['imagePath'],
+        detected: map['detected'],
+        score: map['score'],
+        answer: map['answer'],
+        createdAt: DateTime.parse(map['createdAt']),
+        name: map["name"],
+        email: map["email"]);
   }
-
 }

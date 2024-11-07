@@ -46,14 +46,15 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
             onPressed: () {
               print("EXAM RESULT:");
               print(bubbles.result);
-              Navigator.push(
+              Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
                       builder: (context) => ResultsScreen(
                           exam: widget.exam,
                           answer: bubbles.result.split(''),
                           studentId: bubbles.studentId,
-                          answerKey: widget.exam.answerKey.split(''))));
+                          answerKey: widget.exam.answerKey.split(''))),
+                  (route) => false);
             },
             child:
                 const Text("See Result", style: TextStyle(color: Colors.white)))

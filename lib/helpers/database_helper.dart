@@ -33,12 +33,14 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY,
         examId INTEGER,
         userId INTEGER,
-        studentNumber TEXT,
+        studentNumber TEXT UNIQUE,
         imagePath TEXT,
         detected INTEGER,
         score INTEGER,
         answer TEXT,
         createdAt TEXT,
+        name TEXT,
+        email TEXT,
         FOREIGN KEY (examId) REFERENCES exams (id) ON DELETE CASCADE
       )''',
     );
@@ -80,12 +82,13 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'database.db');
     return await openDatabase(
       path,
-      version: 27,
+      version: 41,
       onCreate: (db, version) async {
         await _createTables(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         // Drop existing tables and recreate them
+        print("NEW VERSION");
         await db.execute('DROP TABLE IF EXISTS responses');
         await db.execute('DROP TABLE IF EXISTS exams');
         await db.execute('DROP TABLE IF EXISTS classes');

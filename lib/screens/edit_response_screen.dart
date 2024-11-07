@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:scannerv3/helpers/toast_helper.dart';
 
 class EditResponseScreen extends StatefulWidget {
   List<String> answer;
   final List<String> answerKey;
-  final Function(String, int) updateAnswer;
+  final Function(List<String>) updateAnswer;
 
   EditResponseScreen(
       {super.key,
@@ -16,6 +18,29 @@ class EditResponseScreen extends StatefulWidget {
 }
 
 class _EditResponseScreenState extends State<EditResponseScreen> {
+  List<String> editedAnswer = [];
+
+  void updateEditAnswer(String label, int index) {
+    setState(() {
+      editedAnswer[index] = label;
+    });
+  }
+
+  void edit() {
+    widget.updateAnswer(editedAnswer);
+    Navigator.pop(context);
+    ToastHelper.showToast("Updated answer");
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setState(() {
+      editedAnswer = List.from(widget.answer);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,6 +57,25 @@ class _EditResponseScreenState extends State<EditResponseScreen> {
       ),
       body: Column(
         children: [
+          Container(
+              padding: EdgeInsets.all(12),
+              width: double.infinity,
+              child: ElevatedButton(
+                  onPressed: () {
+                    edit();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(8.0), // Set border radius
+                    ),
+                  ),
+                  child: const Text(
+                    "Save Changes",
+                    style: TextStyle(color: Colors.white),
+                  ))),
           Expanded(
               child: ListView.builder(
                   itemCount: widget.answer.length,
@@ -48,35 +92,35 @@ class _EditResponseScreenState extends State<EditResponseScreen> {
                             GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    widget.updateAnswer("A", index);
+                                    updateEditAnswer("A", index);
                                   });
                                 },
                                 child: _buildBubble("A", index)),
                             GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    widget.updateAnswer("B", index);
+                                    updateEditAnswer("B", index);
                                   });
                                 },
                                 child: _buildBubble("B", index)),
                             GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    widget.updateAnswer("C", index);
+                                    updateEditAnswer("C", index);
                                   });
                                 },
                                 child: _buildBubble("C", index)),
                             GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    widget.updateAnswer("D", index);
+                                    updateEditAnswer("D", index);
                                   });
                                 },
                                 child: _buildBubble("D", index)),
                             GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    widget.updateAnswer("E", index);
+                                    updateEditAnswer("E", index);
                                   });
                                 },
                                 child: _buildBubble("E", index)),
@@ -89,8 +133,8 @@ class _EditResponseScreenState extends State<EditResponseScreen> {
   }
 
   Widget _buildBubble(String label, int index) {
-    bool isKey = widget.answer[index].contains(label);
-    bool isCorrect = widget.answer[index].contains(widget.answerKey[index]);
+    bool isKey = editedAnswer[index].contains(label);
+    bool isCorrect = editedAnswer[index].contains(widget.answerKey[index]);
 
     return Container(
       margin: EdgeInsets.only(right: 8),
