@@ -145,6 +145,23 @@ class _ResultsScreenState extends State<ResultsScreen> {
             data: data, options: Options(headers: {'Authorization': token}));
 
         if (res.statusCode == 200) {
+          // save to db
+          ResponseOffline responseOffline = ResponseOffline(
+              name: widget.existingResponse?.name ?? "Unknown Student",
+              email: widget.existingResponse?.email ?? "No email provided",
+              examId: data["exam_id"],
+              studentNumber: data["student_number"],
+              imagePath: data["image_path"],
+              detected: data["detected"],
+              score: data["score"],
+              answer: data["answer"],
+              createdAt: DateTime.parse(data["created_at"]));
+
+          // insert to db for offline access
+          final db = await DatabaseHelper().database;
+          final ok = await db.insert('responses', responseOffline.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace);
+              
           if (mounted) {
             DialogHelper.showCustomDialog(
                 title: "Response is saved",

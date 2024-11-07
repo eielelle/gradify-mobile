@@ -35,7 +35,7 @@ class ExamScreen extends StatelessWidget {
       {
         'label': 'Item Analysis',
         'icon': Icons.analytics,
-        'route': ItemAnalysisScreen(examId: exam.id)
+        'route': ItemAnalysisScreen(examId: exam.id, answerKey: exam.answerKey.split(""),)
       },
     ];
 

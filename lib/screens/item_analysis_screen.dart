@@ -7,8 +7,10 @@ import 'package:scannerv3/widgets/statistics_widget.dart';
 
 class ItemAnalysisScreen extends StatefulWidget {
   final int examId;
+  final List<String> answerKey;
 
-  const ItemAnalysisScreen({super.key, required this.examId});
+  const ItemAnalysisScreen(
+      {super.key, required this.examId, required this.answerKey});
 
   @override
   State<ItemAnalysisScreen> createState() => _ItemAnalysisScreenState();
@@ -34,15 +36,13 @@ class _ItemAnalysisScreenState extends State<ItemAnalysisScreen> {
         return ResponseOffline.fromMap(maps[i]);
       });
 
-      // setPassingRate(list);
-
       return list;
     } catch (error) {
       return Future.error("Database fallback failed.");
     }
   }
 
-  void setPassingRate(List<ResponseOffline> ro) {
+  Map<String, dynamic> setPassingRate(List<ResponseOffline> ro) {
     int passInt = 0;
     int low = 0;
     int high = 0;
@@ -73,38 +73,50 @@ class _ItemAnalysisScreenState extends State<ItemAnalysisScreen> {
     }
 
     var passPercent = ((passInt / 50) * 100) * 100;
-    setState(() {
-      pass = passPercent;
-      fail = 100 - passPercent;
-      lowestScore = low;
-      highesScore = high;
-      avg = total / ro.length;
-    });
+    return {
+      "pass": passPercent,
+      "fail": 100 - passPercent,
+      "low": low,
+      "high": high,
+      "avg": total / ro.length
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Item Analysis")),
+      backgroundColor: const Color.fromRGBO(41, 46, 50, 1),
+      appBar: AppBar(
+        title: Text("Item Analysis"),
+        backgroundColor: const Color.fromRGBO(101, 188, 80, 1),
+      ),
       body: FutureBuilder(
           future: fetchResponsesLocal(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              // if error has seen
-              print(snapshot.error);
               return Text("Error");
             }
 
-            return Column(
-              children: [
-                StatisticsWidget(
-                    pass: 70, fail: 30, low: 12, high: 15, avg: 13),
-                ItemAnalysisWidget(),
-                ScoreDistWidget()
-              ],
-            );
+            final passData = setPassingRate(snapshot.data!);
+
+            return Expanded(
+                child: SingleChildScrollView(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  StatisticsWidget(
+                      pass: passData["pass"],
+                      fail: passData["fail"],
+                      low: passData["low"],
+                      high: passData["high"],
+                      avg: passData["avg"]),
+                  ItemAnalysisWidget(
+                      ro: snapshot.data!, answerKey: widget.answerKey),
+                ],
+              ),
+            ));
           }),
     );
   }
