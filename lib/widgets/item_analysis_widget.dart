@@ -21,12 +21,12 @@ class _ItemAnalysisWidgetState extends State<ItemAnalysisWidget> {
       int correct = 0;
 
       for (var x in widget.ro) {
-        if (x.answer[i] == widget.answerKey[i]) {
+        if (x.answer.split("")[i - 1] == widget.answerKey[i - 1]) {
           correct += 1;
         }
       }
 
-      freq.add(correct);
+      freq[i - 1] = correct;
     }
 
     return Column(
@@ -52,7 +52,7 @@ class _ItemAnalysisWidgetState extends State<ItemAnalysisWidget> {
                             textAlign: TextAlign.center,
                           ),
                           Text(
-                            freq.length >= 50 ? freq[i].toString() : "",
+                            freq.length >= 50 ? freq[i - 1].toString() : "",
                             style: TextStyle(color: Colors.white),
                             textAlign: TextAlign.center,
                           ),

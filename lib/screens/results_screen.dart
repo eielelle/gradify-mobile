@@ -85,7 +85,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       "answer": widget.answer.join(),
       "score": widget.score,
       "detected": widget.detected,
-      "image_path": "",
+      "image_path": widget.answer.join(),
       "created_at": DateTime.now().toString()
     };
 
