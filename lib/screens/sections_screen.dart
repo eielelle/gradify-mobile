@@ -100,34 +100,33 @@ class _SectionsScreenState extends State<SectionsScreen> {
             )),
         body: Container(
           padding: EdgeInsets.all(12),
-          child: Expanded(
-              child: FutureBuilder<List<Section>>(
-                  future: fetchSectionsWithFallback(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return const Center(
-                          child: Text("Something went wrong.",
-                              style: TextStyle(color: Colors.white)));
-                    }
+          child: FutureBuilder<List<Section>>(
+              future: fetchSectionsWithFallback(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(
+                      child: Text("Something went wrong.",
+                          style: TextStyle(color: Colors.white)));
+                }
 
-                      if (snapshot.data!.isEmpty) {
-                        return Center(
-                            child: Column(children: [
-                          Image.asset('assets/images/empty.gif',
-                              width: 300, height: 300),
-                          const Text("No sections assigned yet.",
-                              style: TextStyle(color: Colors.white))
-                        ]));
-                      }
+                if (snapshot.data!.isEmpty) {
+                  return Center(
+                      child: Column(children: [
+                    Image.asset('assets/images/empty.gif',
+                        width: 300, height: 300),
+                    const Text("No sections assigned yet.",
+                        style: TextStyle(color: Colors.white))
+                  ]));
+                }
 
-                    return ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          return _buildCard(snapshot.data![index]);
-                        });
-                  })),
+                return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      return _buildCard(snapshot.data![index]);
+                    });
+              }),
         ));
   }
 

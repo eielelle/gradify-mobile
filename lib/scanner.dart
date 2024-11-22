@@ -142,7 +142,7 @@ class Scanner {
         if (num < 0) {
           if (num == -1) {
             // firstPartAnswer += "$count_first - MULTIPLE SHADES\n";
-            firstPartAnswer += "?";
+            firstPartAnswer += "*";
           } else if (num == -2) {
             // firstPartAnswer += "$count_first - UNDETECTED OR NO ANSWER\n";
             firstPartAnswer += "?";
@@ -167,7 +167,7 @@ class Scanner {
         if (num < 0) {
           if (num == -1) {
             // secondPartAnswer += "$count_sec - MULTIPLE SHADES\n";
-            secondPartAnswer += "?";
+            secondPartAnswer += "*";
           } else if (num == -2) {
             // secondPartAnswer += "$count_sec - UNDETECTED OR NO ANSWER\n";
             secondPartAnswer += "?";

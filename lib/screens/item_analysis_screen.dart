@@ -101,8 +101,7 @@ class _ItemAnalysisScreenState extends State<ItemAnalysisScreen> {
 
             final passData = setPassingRate(snapshot.data!);
 
-            return Expanded(
-                child: SingleChildScrollView(
+            return SingleChildScrollView(
               padding: EdgeInsets.all(12),
               child: Column(
                 children: [
@@ -116,7 +115,7 @@ class _ItemAnalysisScreenState extends State<ItemAnalysisScreen> {
                       ro: snapshot.data!, answerKey: widget.answerKey),
                 ],
               ),
-            ));
+            );
           }),
     );
   }
