@@ -40,7 +40,7 @@ class _SigninScreenState extends State<SigninScreen> {
 
     try {
       final res = await _dio.post(ApiEndpoints.signIn, data: {
-        "user": {"email": email, "password": password}
+        "user": {"login": email, "password": password}
       });
 
       if (res.statusCode == 200) {
