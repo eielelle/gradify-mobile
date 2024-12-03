@@ -24,6 +24,7 @@ class ResultsScreen extends StatefulWidget {
   int score = 0;
   int detected = 0;
   final ResponseOffline? existingResponse;
+  String studentName = "Unknown Student";
 
   ResultsScreen(
       {super.key,
@@ -48,6 +49,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     widget._controller.value = TextEditingValue(text: widget.studentId);
     setScore();
     setDetected();
+    setStud();
   }
 
   @override
@@ -76,6 +78,39 @@ class _ResultsScreenState extends State<ResultsScreen> {
     setState(() {
       widget.score = score;
     });
+  }
+
+  void setStud() async {
+    print("AAAAAAAAAAAAAAAAAAA");
+    print("GETTING STUDENT NAME");
+    final Map<String, dynamic> data = {
+      "student_number": widget.studentId,
+    };
+
+    try {
+      final token = await TokenManager().getAuthToken();
+
+      if (token != null) {
+        final res = await _dio.get(ApiEndpoints.studentName,
+            data: data, options: Options(headers: {'Authorization': token}));
+
+        if (res.statusCode == 200) {
+          setState(() {
+            widget.studentName = res.data?["student"];
+          });
+        } else {
+          setState(() {
+            widget.studentName = "Bad request";
+          });
+        }
+      }
+    } on DioException catch (error) {
+      String msg = "Something went wrong";
+
+      setState(() {
+        widget.studentName = msg;
+      });
+    }
   }
 
   Future<void> saveResponseWithFallback() async {
@@ -161,7 +196,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           final db = await DatabaseHelper().database;
           final ok = await db.insert('responses', responseOffline.toMap(),
               conflictAlgorithm: ConflictAlgorithm.replace);
-              
+
           if (mounted) {
             DialogHelper.showCustomDialog(
                 title: "Response is saved",
@@ -233,6 +268,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
                           widget.studentId = widget._controller.text;
                           Navigator.of(context).pop();
                         });
+
+                        setStud();
                       },
               ),
             ],
@@ -319,6 +356,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       Text(widget.exam.subjectName,
                           style: const TextStyle(fontWeight: FontWeight.bold)),
                       SizedBox(height: 20),
+                      Row(
+                        children: [
+                          const Text("Student: ",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text(widget.studentName),
+                        ],
+                      ),
                       Row(
                         children: [
                           const Text("Student ID: ",
